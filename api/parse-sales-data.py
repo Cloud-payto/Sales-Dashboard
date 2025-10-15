@@ -5,15 +5,18 @@ import os
 import tempfile
 import re
 from io import BytesIO
+from datetime import datetime
 
 # Add parent directory to path to import sales_parser
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 try:
     from sales_parser import SalesDashboardParser
+    import pandas as pd
 except ImportError:
     # Fallback if parser not available
     SalesDashboardParser = None
+    pd = None
 
 def parse_multipart_form_data(data, boundary):
     """Parse multipart/form-data to extract file"""
@@ -36,6 +39,30 @@ def parse_multipart_form_data(data, boundary):
                     return filename, file_content
 
     return None, None
+
+def clean_nan_values(obj):
+    """Recursively clean NaN values from nested dictionaries and lists"""
+    if isinstance(obj, dict):
+        return {key: clean_nan_values(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [clean_nan_values(item) for item in obj]
+    elif pd and pd.isna(obj):
+        return None
+    elif isinstance(obj, float):
+        # Check if it's NaN using string comparison as fallback
+        if str(obj) == 'nan' or obj != obj:  # NaN != NaN is True
+            return None
+        return obj
+    else:
+        return obj
+
+def json_serializer(obj):
+    """Custom JSON serializer to handle pandas types and datetime objects"""
+    if pd and pd.isna(obj):
+        return None  # Convert NaN to null
+    if isinstance(obj, (datetime,)):
+        return obj.isoformat()
+    return str(obj)
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -88,6 +115,9 @@ class handler(BaseHTTPRequestHandler):
             parser.load_data()
             dashboard_data = parser.get_dashboard_summary()
 
+            # Clean NaN values from the data
+            dashboard_data = clean_nan_values(dashboard_data)
+
             # Clean up temp file
             if temp_file_path and os.path.exists(temp_file_path):
                 os.remove(temp_file_path)
@@ -105,7 +135,7 @@ class handler(BaseHTTPRequestHandler):
                 'data': dashboard_data
             }
 
-            self.wfile.write(json.dumps(response, default=str).encode())
+            self.wfile.write(json.dumps(response, default=json_serializer).encode())
 
         except Exception as e:
             # Clean up temp file on error
