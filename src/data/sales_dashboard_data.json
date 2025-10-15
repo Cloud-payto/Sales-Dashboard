@@ -206,21 +206,21 @@
         "Name": "ACCENT EYECARE",
         "City": "PHOENIX",
         "CY Total": 2485.97,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 94659,
         "Name": "YAVAPAI EYE CARE",
         "City": "PRESCOTT VALLEY",
         "CY Total": 2169.62,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 75519,
         "Name": "FOCAL POINT EYEWEAR",
         "City": "TUBA CITY",
         "CY Total": 1392.95,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 95839,
@@ -234,7 +234,7 @@
         "Name": "ARCADIA EYE CARE",
         "City": "SCOTTSDALE",
         "CY Total": 854.96,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 90320,
@@ -248,63 +248,63 @@
         "Name": "ALPINE EYECARE",
         "City": "ALPINE",
         "CY Total": 733.82,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 95779,
         "Name": "BRANZS EYEWEAR",
         "City": "CASHION",
         "CY Total": 419.4,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 95879,
         "Name": "EYE DOCTORS OF ARIZONA",
         "City": "PHOENIX",
         "CY Total": 360.0,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 95659,
         "Name": "ARIZONA EYE HEALTH",
         "City": "SCOTTSDALE",
         "CY Total": 244.51,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 93754,
         "Name": "IMAGE EYECARE",
         "City": "LAS VEGAS",
         "CY Total": 146.86,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 95900,
         "Name": "PRIMECARE ADMINISTRATORS INC",
         "City": "LAS VEGAS",
         "CY Total": 119.76,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 85761,
         "Name": "DR. MARK DOUBRAVA MD",
         "City": "LAS VEGAS",
         "CY Total": 19.96,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 85520,
         "Name": "OPTIC GALLERY #2",
         "City": "LAS VEGAS",
         "CY Total": 13.98,
-        "Project Code": NaN
+        "Project Code": null
       },
       {
         "Acct #": 85545,
         "Name": "OPTIC GALLERY #3",
         "City": "LAS VEGAS",
         "CY Total": 6.99,
-        "Project Code": NaN
+        "Project Code": null
       }
     ],
     "reactivated_accounts": [
@@ -798,11 +798,11 @@
     "total_brands_sold": 25
   },
   "insights": [
-    "\ud83d\udd34 URGENT: SUNDANCE OPTICAL declined by $6,554.74 (24,753.41 \u2192 $18,198.67)",
-    "\ud83d\udfe2 TOP PERFORMER: CORONA OPTIQUE increased by $14,911.49 ($17,442.30 \u2192 $32,353.79)",
-    "\ud83d\udcc9 Frame Alert: SLIP-IN CASES sales down 1960 units (-29.2% decline)",
-    "\ud83d\udcc8 Frame Opportunity: LIME sales up 1772 units (18.4% growth)",
-    "\u26a0\ufe0f  72 of 135 accounts (53.3%) are declining",
-    "\u2728 9 new accounts added, generating $8,294.55"
+    "🔴 URGENT: SUNDANCE OPTICAL declined by $6,554.74 (24,753.41 → $18,198.67)",
+    "🟢 TOP PERFORMER: CORONA OPTIQUE increased by $14,911.49 ($17,442.30 → $32,353.79)",
+    "📉 Frame Alert: SLIP-IN CASES sales down 1960 units (-29.2% decline)",
+    "📈 Frame Opportunity: LIME sales up 1772 units (18.4% growth)",
+    "⚠️  72 of 135 accounts (53.3%) are declining",
+    "✨ 9 new accounts added, generating $8,294.55"
   ]
 }

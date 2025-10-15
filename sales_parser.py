@@ -486,8 +486,16 @@ class SalesDashboardParser:
         if output_path is None:
             output_path = 'sales_dashboard_data.json'
 
-        with open(output_path, 'w') as f:
-            json.dump(dashboard_data, f, indent=2, default=str)
+        # Custom JSON encoder to handle NaN and special types
+        def json_serializer(obj):
+            if pd.isna(obj):
+                return None
+            if isinstance(obj, (pd.Timestamp, datetime)):
+                return obj.isoformat()
+            return str(obj)
+
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(dashboard_data, f, indent=2, default=json_serializer, ensure_ascii=False)
 
         print(f"[OK] Dashboard data exported to {output_path}")
         return output_path
