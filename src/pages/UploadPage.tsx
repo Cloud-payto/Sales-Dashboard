@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDashboard } from '../contexts/DashboardContext';
 
 const UploadPage: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
@@ -9,6 +10,7 @@ const UploadPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const { updateDashboardData } = useDashboard();
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -71,20 +73,23 @@ const UploadPage: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      // TODO: Replace with actual API endpoint
-      // For now, simulate upload
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call the API to parse the file
+      const response = await fetch('/api/parse-sales-data', {
+        method: 'POST',
+        body: formData
+      });
 
-      // const response = await fetch('/api/parse-sales-data', {
-      //   method: 'POST',
-      //   body: formData
-      // });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Upload failed');
+      }
 
-      // if (!response.ok) {
-      //   throw new Error('Upload failed');
-      // }
+      const result = await response.json();
 
-      // const data = await response.json();
+      // Update the dashboard data in context
+      if (result.data) {
+        updateDashboardData(result.data);
+      }
 
       setSuccess(true);
       setTimeout(() => {
