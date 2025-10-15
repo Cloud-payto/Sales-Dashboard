@@ -1,0 +1,1077 @@
+[
+  {
+    "account_number": 82703,
+    "account_name": "SUNDANCE OPTICAL",
+    "city": "PHOENIX",
+    "total_decline": -6554.74,
+    "current_year_total": 18198.67,
+    "previous_year_total": 24753.41,
+    "frame_purchases": {
+      "B.M.E.C.": 131.0,
+      "GB+ COLLECTION": 140.0,
+      "GENEVIEVE BOUTIQUE": 23.0,
+      "FASHIONTABULOUS": 9.0,
+      "UROCK": 29.0,
+      "MODZ SUNZ": 4.0,
+      "GENEVIEVE PARIS DESIGN": 15.0,
+      "GIOVANI DI VENEZIA": 12.0,
+      "MODZ": 74.0,
+      "MODZ KIDS": 63.0,
+      "MODERN TIMES": 50.0,
+      "MODERN METALS": 8.0,
+      "MODERN PLASTICS II": 115.0,
+      "MODERN PLASTICS I": 11.0,
+      "CASES - CLAMSHELL": 210.0,
+      "BRANDED CASES": 515.0
+    }
+  },
+  {
+    "account_number": 82874,
+    "account_name": "NEVADA EYE PHYSICIANS",
+    "city": "HENDERSON",
+    "total_decline": -4994.98,
+    "current_year_total": 0.0,
+    "previous_year_total": 4994.98,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 86478,
+    "account_name": "LAVEEN TOTAL EYECARE, LLC",
+    "city": "PHOENIX",
+    "total_decline": -4337.59,
+    "current_year_total": 1839.43,
+    "previous_year_total": 6177.02,
+    "frame_purchases": {
+      "MODERN ART": 1.0,
+      "B.M.E.C.": 18.0,
+      "GB+ COLLECTION": 15.0,
+      "GENEVIEVE PARIS DESIGN": 8.0,
+      "GIOVANI DI VENEZIA": 4.0,
+      "MODZ": 4.0,
+      "MODZ KIDS": 1.0,
+      "MODERN TIMES": 4.0,
+      "MODERN METALS": 4.0,
+      "MODERN PLASTICS II": 35.0,
+      "MODERN PLASTICS I": 18.0,
+      "CASES - CLAMSHELL": 100.0
+    }
+  },
+  {
+    "account_number": 82600,
+    "account_name": "NEW OUTLOOK OPTICAL",
+    "city": "LAS VEGAS",
+    "total_decline": -4130.7,
+    "current_year_total": 0.0,
+    "previous_year_total": 4130.7,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 74198,
+    "account_name": "COLORADO RIVER EYE CARE",
+    "city": "BULLHEAD CITY",
+    "total_decline": -3514.77,
+    "current_year_total": 2102.04,
+    "previous_year_total": 5616.81,
+    "frame_purchases": {
+      "MODERN ART": 2.0,
+      "B.M.E.C.": 16.0,
+      "GB+ COLLECTION": 9.0,
+      "GENEVIEVE BOUTIQUE": 12.0,
+      "MODERN METALS": 69.0,
+      "MODERN PLASTICS II": 109.0,
+      "MODERN PLASTICS I": 18.0
+    }
+  },
+  {
+    "account_number": 84072,
+    "account_name": "SOMERTON EYECARE CENTER INC",
+    "city": "SOMERTON",
+    "total_decline": -2901.46,
+    "current_year_total": 4336.06,
+    "previous_year_total": 7237.52,
+    "frame_purchases": {
+      "B.M.E.C.": 21.0,
+      "GB+ COLLECTION": 3.0,
+      "MODZ": 3.0,
+      "MODZ KIDS": 4.0,
+      "MODERN TIMES": 129.0,
+      "MODERN METALS": 13.0,
+      "MODERN PLASTICS II": 280.0,
+      "MODERN PLASTICS I": 101.0,
+      "TOOLS": 1.0
+    }
+  },
+  {
+    "account_number": 87394,
+    "account_name": "I CARE LAS VEGAS LLC",
+    "city": "LAS VEGAS",
+    "total_decline": -2797.1,
+    "current_year_total": 3802.58,
+    "previous_year_total": 6599.68,
+    "frame_purchases": {
+      "B.M.E.C.": 34.0,
+      "MODERN METALS": 10.0,
+      "MODERN PLASTICS II": 447.0,
+      "MODERN PLASTICS I": 10.0,
+      "CASES - CLAMSHELL": 200.0,
+      "CASES - SLIP IN": 350.0,
+      "NOSE PADS": 25.0
+    }
+  },
+  {
+    "account_number": 90425,
+    "account_name": "LAS VEGAS PAIUTE TRIBE OPTICAL",
+    "city": "LAS VEGAS",
+    "total_decline": -2592.07,
+    "current_year_total": 3088.66,
+    "previous_year_total": 5680.73,
+    "frame_purchases": {
+      "MODERN ART": 3.0,
+      "G.V.X.": 1.0,
+      "B.M.E.C.": 41.0,
+      "GB+ COLLECTION": 38.0,
+      "GENEVIEVE PARIS DESIGN": 5.0,
+      "GIOVANI DI VENEZIA": 8.0,
+      "MODZ": 2.0,
+      "MODERN TIMES": 12.0,
+      "MODERN METALS": 3.0,
+      "MODERN PLASTICS II": 27.0,
+      "MODERN PLASTICS I": 4.0
+    }
+  },
+  {
+    "account_number": 82572,
+    "account_name": "YUMA VISION CENTER",
+    "city": "YUMA",
+    "total_decline": -2199.36,
+    "current_year_total": 1884.1,
+    "previous_year_total": 4083.46,
+    "frame_purchases": {
+      "B.M.E.C.": 1.0,
+      "GB+ COLLECTION": 4.0,
+      "GENEVIEVE BOUTIQUE": 5.0,
+      "GENEVIEVE PARIS DESIGN": 2.0,
+      "MODERN METALS": 75.0,
+      "MODERN PLASTICS II": 58.0,
+      "MODERN PLASTICS I": 57.0,
+      "CASES - CLAMSHELL": 600.0
+    }
+  },
+  {
+    "account_number": 87986,
+    "account_name": "CAPELLA EYECARE",
+    "city": "FOUNTAIN HILLS",
+    "total_decline": -2017.86,
+    "current_year_total": 295.0,
+    "previous_year_total": 2312.86,
+    "frame_purchases": {
+      "B.M.E.C.": 6.0,
+      "MODERN TIMES": 1.0,
+      "BRANDED CASES": 7.0
+    }
+  },
+  {
+    "account_number": 73437,
+    "account_name": "DR MICHAEL JONES",
+    "city": "LAS VEGAS",
+    "total_decline": -1828.1,
+    "current_year_total": 3724.97,
+    "previous_year_total": 5553.07,
+    "frame_purchases": {
+      "MODZ": 2.0,
+      "MODZ KIDS": -1.0,
+      "MODERN TIMES": 219.0,
+      "MODERN METALS": 35.0,
+      "MODERN PLASTICS II": 156.0,
+      "MODERN PLASTICS I": 112.0
+    }
+  },
+  {
+    "account_number": 93314,
+    "account_name": "CENTER FOR SIGHT",
+    "city": "LAS VEGAS",
+    "total_decline": -1759.28,
+    "current_year_total": 965.65,
+    "previous_year_total": 2724.93,
+    "frame_purchases": {
+      "MODERN TIMES": 4.0,
+      "MODERN METALS": 115.0,
+      "MODERN PLASTICS II": 116.0,
+      "MODERN PLASTICS I": 104.0
+    }
+  },
+  {
+    "account_number": 86721,
+    "account_name": "FAMILY EYE CARE",
+    "city": "LAS VEGAS",
+    "total_decline": -1704.66,
+    "current_year_total": 794.84,
+    "previous_year_total": 2499.5,
+    "frame_purchases": {
+      "B.M.E.C.": 8.0,
+      "GB+ COLLECTION": 17.0,
+      "MODERN METALS": 5.0,
+      "MODERN PLASTICS II": 10.0,
+      "MODERN PLASTICS I": 1.0
+    }
+  },
+  {
+    "account_number": 93148,
+    "account_name": "HANNA PROFESSIONAL LLC",
+    "city": "LAS VEGAS",
+    "total_decline": -1659.08,
+    "current_year_total": 1240.92,
+    "previous_year_total": 2900.0,
+    "frame_purchases": {
+      "MODZFLEX": 2.0,
+      "B.M.E.C.": 7.0,
+      "MODERN TIMES": 54.0,
+      "MODERN METALS": 3.0,
+      "MODERN PLASTICS I": 5.0,
+      "BRANDED CASES": 9.0
+    }
+  },
+  {
+    "account_number": 93028,
+    "account_name": "VIVO VISION",
+    "city": "LAS VEGAS",
+    "total_decline": -1630.47,
+    "current_year_total": 13513.7,
+    "previous_year_total": 15144.17,
+    "frame_purchases": {
+      "MODERN ART": 5.0,
+      "MODZ TITANIUM": 5.0,
+      "B.M.E.C.": 95.0,
+      "GB+ COLLECTION": 60.0,
+      "GENEVIEVE BOUTIQUE": 15.0,
+      "MODZ SUNZ": 1.0,
+      "GENEVIEVE PARIS DESIGN": 27.0,
+      "MODZ": 8.0,
+      "MODZ KIDS": 3.0,
+      "MODERN TIMES": 323.0,
+      "MODERN METALS": 122.0,
+      "MODERN PLASTICS II": 285.0,
+      "MODERN PLASTICS I": 123.0,
+      "BRANDED CASES": 1.0
+    }
+  },
+  {
+    "account_number": 83167,
+    "account_name": "DR JAMES BECKWITH",
+    "city": "LAS VEGAS",
+    "total_decline": -1602.74,
+    "current_year_total": 7005.75,
+    "previous_year_total": 8608.49,
+    "frame_purchases": {
+      "GB+ COLLECTION": 32.0,
+      "GENEVIEVE BOUTIQUE": 5.0,
+      "GENEVIEVE PARIS DESIGN": 67.0,
+      "GIOVANI DI VENEZIA": 30.0,
+      "MODZ KIDS": 2.0,
+      "MODERN TIMES": 51.0,
+      "MODERN METALS": 81.0,
+      "MODERN PLASTICS II": 419.0,
+      "MODERN PLASTICS I": 125.0
+    }
+  },
+  {
+    "account_number": 82644,
+    "account_name": "ADVANCED VISION INSTITUTE",
+    "city": "LAS VEGAS",
+    "total_decline": -1461.08,
+    "current_year_total": 2894.14,
+    "previous_year_total": 4355.22,
+    "frame_purchases": {
+      "MODZ": 6.0,
+      "MODERN TIMES": 29.0,
+      "MODERN METALS": 77.0,
+      "MODERN PLASTICS II": 363.0,
+      "MODERN PLASTICS I": 46.0
+    }
+  },
+  {
+    "account_number": 83599,
+    "account_name": "CLARK CAMPBELL O.D. P.C.",
+    "city": "SCOTTSDALE",
+    "total_decline": -1446.96,
+    "current_year_total": 364.97,
+    "previous_year_total": 1811.93,
+    "frame_purchases": {
+      "MODERN ART": 3.0,
+      "B.M.E.C.": 1.0,
+      "GIOVANI DI VENEZIA": 3.0,
+      "MODZ": 5.0,
+      "MODERN PLASTICS II": 1.0,
+      "MODERN PLASTICS I": 2.0
+    }
+  },
+  {
+    "account_number": 92752,
+    "account_name": "PRECISION EYECARE",
+    "city": "MESQUITE",
+    "total_decline": -1422.05,
+    "current_year_total": 912.01,
+    "previous_year_total": 2334.06,
+    "frame_purchases": {
+      "G.V.X.": 3.0,
+      "MODZ TITANIUM": -5.0,
+      "GB+ COLLECTION": -27.0,
+      "GENEVIEVE BOUTIQUE": -1.0,
+      "FASHIONTABULOUS": -22.0,
+      "UROCK": -1.0,
+      "MODZ SUNZ": -14.0,
+      "GENEVIEVE PARIS DESIGN": -8.0,
+      "MODZ": 57.0,
+      "MODZ KIDS": 13.0,
+      "MODERN TIMES": 70.0,
+      "MODERN METALS": 5.0,
+      "MODERN PLASTICS II": -23.0,
+      "MODERN PLASTICS I": 3.0,
+      "CASES - SLIP IN": 300.0,
+      "BRANDED CASES": 124.0
+    }
+  },
+  {
+    "account_number": 84998,
+    "account_name": "CUSTOM EYES LLC",
+    "city": "HENDERSON",
+    "total_decline": -993.66,
+    "current_year_total": 1512.19,
+    "previous_year_total": 2505.85,
+    "frame_purchases": {
+      "MODZ TITANIUM": -1.0,
+      "B.M.E.C.": 23.0,
+      "GB+ COLLECTION": 7.0,
+      "MODZ": 2.0,
+      "MODZ KIDS": 5.0,
+      "MODERN TIMES": 8.0,
+      "MODERN METALS": 10.0,
+      "MODERN PLASTICS II": 51.0,
+      "MODERN PLASTICS I": 20.0
+    }
+  },
+  {
+    "account_number": 87188,
+    "account_name": "OPTIC GALLERY #5",
+    "city": "LAS VEGAS",
+    "total_decline": -893.55,
+    "current_year_total": 4837.88,
+    "previous_year_total": 5731.43,
+    "frame_purchases": {
+      "MODZ KIDS": 10.0,
+      "MODERN TIMES": 4.0,
+      "MODERN METALS": 143.0,
+      "MODERN PLASTICS II": 583.0,
+      "MODERN PLASTICS I": 186.0
+    }
+  },
+  {
+    "account_number": 95266,
+    "account_name": "ARIZONA VISION THERAPY CTR",
+    "city": "TUCSON",
+    "total_decline": -887.83,
+    "current_year_total": 387.92,
+    "previous_year_total": 1275.75,
+    "frame_purchases": {
+      "GIOVANI DI VENEZIA": 2.0,
+      "MODZ": 4.0,
+      "MODERN TIMES": 18.0,
+      "MODERN PLASTICS II": 8.0
+    }
+  },
+  {
+    "account_number": 76534,
+    "account_name": "PAYSON EYECARE CENTER",
+    "city": "PAYSON",
+    "total_decline": -872.21,
+    "current_year_total": 2695.33,
+    "previous_year_total": 3567.54,
+    "frame_purchases": {
+      "MODERN ART": 3.0,
+      "B.M.E.C.": 1.0,
+      "MODERN TIMES": 54.0,
+      "MODERN METALS": 89.0,
+      "MODERN PLASTICS II": 28.0,
+      "MODERN PLASTICS I": 9.0,
+      "BRANDED CASES": 5.0,
+      "NOSE PADS": 2240.0
+    }
+  },
+  {
+    "account_number": 73193,
+    "account_name": "DR STEVEN GRANT",
+    "city": "HENDERSON",
+    "total_decline": -773.67,
+    "current_year_total": 376.85,
+    "previous_year_total": 1150.52,
+    "frame_purchases": {
+      "GB+ COLLECTION": 4.0,
+      "GENEVIEVE PARIS DESIGN": 4.0,
+      "MODERN PLASTICS II": 15.0,
+      "BRANDED CASES": 15.0
+    }
+  },
+  {
+    "account_number": 93434,
+    "account_name": "SIGHT ON SITE MOBILE EYE CARE",
+    "city": "CHANDLER",
+    "total_decline": -729.56,
+    "current_year_total": 231.28,
+    "previous_year_total": 960.84,
+    "frame_purchases": {
+      "G.V.X.": 1.0,
+      "FASHIONTABULOUS": -1.0,
+      "UROCK": 3.0,
+      "MODZ SUNZ": -1.0,
+      "GENEVIEVE PARIS DESIGN": 1.0,
+      "GIOVANI DI VENEZIA": -2.0,
+      "MODZ KIDS": -1.0,
+      "MODERN TIMES": -3.0,
+      "MODERN PLASTICS II": 2.0,
+      "CASES - CLAMSHELL": 190.0,
+      "BRANDED CASES": 2.0
+    }
+  },
+  {
+    "account_number": 92533,
+    "account_name": "MODERN EYES FAMILY CARE",
+    "city": "LAS VEGAS",
+    "total_decline": -710.95,
+    "current_year_total": 33.0,
+    "previous_year_total": 743.95,
+    "frame_purchases": {
+      "MODERN TIMES": 3.0
+    }
+  },
+  {
+    "account_number": 88855,
+    "account_name": "EYEDENTITY EYECARE LLC",
+    "city": "LAS VEGAS",
+    "total_decline": -665.99,
+    "current_year_total": 0.0,
+    "previous_year_total": 665.99,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 68851,
+    "account_name": "HENDERSON VISION CARE",
+    "city": "HENDERSON",
+    "total_decline": -627.75,
+    "current_year_total": 8229.36,
+    "previous_year_total": 8857.11,
+    "frame_purchases": {
+      "G.V.X.": 18.0,
+      "MODZ TITANIUM": 4.0,
+      "B.M.E.C.": 57.0,
+      "GB+ COLLECTION": 45.0,
+      "GENEVIEVE BOUTIQUE": 42.0,
+      "FASHIONTABULOUS": 10.0,
+      "UROCK": 1.0,
+      "GENEVIEVE PARIS DESIGN": 23.0,
+      "GIOVANI DI VENEZIA": 4.0,
+      "MODERN TIMES": 2.0,
+      "MODERN METALS": 195.0,
+      "MODERN PLASTICS II": 263.0,
+      "MODERN PLASTICS I": 74.0
+    }
+  },
+  {
+    "account_number": 90558,
+    "account_name": "LEE EYECARE CENTER",
+    "city": "MESA",
+    "total_decline": -569.98,
+    "current_year_total": 489.93,
+    "previous_year_total": 1059.91,
+    "frame_purchases": {
+      "B.M.E.C.": 10.0,
+      "GENEVIEVE BOUTIQUE": 3.0,
+      "MODERN PLASTICS II": 7.0
+    }
+  },
+  {
+    "account_number": 87438,
+    "account_name": "DR LONG KEVIN DIEP-SPMTN",
+    "city": "LAS VEGAS",
+    "total_decline": -564.38,
+    "current_year_total": 489.02,
+    "previous_year_total": 1053.4,
+    "frame_purchases": {
+      "MODERN PLASTICS II": 90.0,
+      "MODERN PLASTICS I": 8.0
+    }
+  },
+  {
+    "account_number": 52830,
+    "account_name": "GOLDEN HILLS OPTICAL",
+    "city": "MESA",
+    "total_decline": -523.82,
+    "current_year_total": 213.05,
+    "previous_year_total": 736.87,
+    "frame_purchases": {
+      "B.M.E.C.": 6.0,
+      "GB+ COLLECTION": 2.0,
+      "GENEVIEVE PARIS DESIGN": 2.0,
+      "MODZ KIDS": -5.0,
+      "MODERN TIMES": 1.0,
+      "MODERN METALS": -1.0,
+      "BRANDED CASES": 13.0
+    }
+  },
+  {
+    "account_number": 86464,
+    "account_name": "THE OPTICAL BOUTIQUE",
+    "city": "SUN CITY",
+    "total_decline": -504.72,
+    "current_year_total": 149.7,
+    "previous_year_total": 654.42,
+    "frame_purchases": {
+      "MODERN METALS": 6.0,
+      "MODERN PLASTICS II": 24.0
+    }
+  },
+  {
+    "account_number": 82982,
+    "account_name": "DR GEORGE LEAKS OD",
+    "city": "LAS VEGAS",
+    "total_decline": -499.0,
+    "current_year_total": 0.0,
+    "previous_year_total": 499.0,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 87940,
+    "account_name": "ARIZONA PRIMARY EYE CARE",
+    "city": "TUCSON",
+    "total_decline": -493.43,
+    "current_year_total": 4759.49,
+    "previous_year_total": 5252.92,
+    "frame_purchases": {
+      "MODERN ART": 4.0,
+      "B.M.E.C.": 41.0,
+      "GB+ COLLECTION": 34.0,
+      "MODZ": 9.0,
+      "MODZ KIDS": 51.0,
+      "MODERN TIMES": 12.0,
+      "MODERN METALS": 163.0,
+      "MODERN PLASTICS II": 271.0,
+      "MODERN PLASTICS I": 92.0,
+      "CASES - CLAMSHELL": 260.0
+    }
+  },
+  {
+    "account_number": 88290,
+    "account_name": "PHILLIPS EYECARE",
+    "city": "SIERRA VISTA",
+    "total_decline": -456.99,
+    "current_year_total": 1767.7,
+    "previous_year_total": 2224.69,
+    "frame_purchases": {
+      "MODERN ART": 1.0,
+      "MODZFLEX": 9.0,
+      "B.M.E.C.": 11.0,
+      "GB+ COLLECTION": 16.0,
+      "GENEVIEVE BOUTIQUE": 8.0,
+      "GENEVIEVE PARIS DESIGN": 6.0,
+      "MODERN TIMES": 7.0,
+      "MODERN METALS": 4.0,
+      "MODERN PLASTICS II": 15.0,
+      "MODERN PLASTICS I": 11.0
+    }
+  },
+  {
+    "account_number": 92839,
+    "account_name": "COCHISE EYE & LASER",
+    "city": "SIERRA VISTA",
+    "total_decline": -429.87,
+    "current_year_total": 487.99,
+    "previous_year_total": 917.86,
+    "frame_purchases": {
+      "B.M.E.C.": 5.0,
+      "GB+ COLLECTION": 3.0,
+      "GENEVIEVE PARIS DESIGN": 5.0,
+      "MODERN TIMES": 1.0,
+      "BRANDED CASES": 12.0
+    }
+  },
+  {
+    "account_number": 94425,
+    "account_name": "EYE ON HEALTH",
+    "city": "PHOENIX",
+    "total_decline": -387.17,
+    "current_year_total": 765.81,
+    "previous_year_total": 1152.98,
+    "frame_purchases": {
+      "GENEVIEVE PARIS DESIGN": 1.0,
+      "GIOVANI DI VENEZIA": 1.0,
+      "MODZ KIDS": 4.0,
+      "MODERN TIMES": 31.0,
+      "MODERN METALS": 6.0,
+      "MODERN PLASTICS II": 13.0,
+      "BRANDED CASES": 6.0
+    }
+  },
+  {
+    "account_number": 82879,
+    "account_name": "CAMP VERDE EYECARE",
+    "city": "CAMP VERDE",
+    "total_decline": -382.95,
+    "current_year_total": 680.95,
+    "previous_year_total": 1063.9,
+    "frame_purchases": {
+      "B.M.E.C.": 6.0,
+      "GB+ COLLECTION": 8.0,
+      "GENEVIEVE PARIS DESIGN": 2.0,
+      "MODERN TIMES": 1.0,
+      "MODERN METALS": 4.0,
+      "MODERN PLASTICS II": 1.0,
+      "BRANDED CASES": 16.0
+    }
+  },
+  {
+    "account_number": 94133,
+    "account_name": "NEVADA EYECARE FLAMINGO",
+    "city": "LAS VEGAS",
+    "total_decline": -349.58,
+    "current_year_total": 29.94,
+    "previous_year_total": 379.52,
+    "frame_purchases": {
+      "MODERN METALS": 6.0
+    }
+  },
+  {
+    "account_number": 93661,
+    "account_name": "SCOTTSDALE EYE PHYSICIANS",
+    "city": "SCOTTSDALE",
+    "total_decline": -327.87,
+    "current_year_total": 33.99,
+    "previous_year_total": 361.86,
+    "frame_purchases": {
+      "GENEVIEVE PARIS DESIGN": 1.0,
+      "MODERN PLASTICS I": 1.0,
+      "BRANDED CASES": 1.0
+    }
+  },
+  {
+    "account_number": 82747,
+    "account_name": "EYE MAGINATION",
+    "city": "MESA",
+    "total_decline": -316.89,
+    "current_year_total": 261.02,
+    "previous_year_total": 577.91,
+    "frame_purchases": {
+      "B.M.E.C.": 1.0,
+      "MODZ SUNZ": 1.0,
+      "MODZ KIDS": 9.0,
+      "MODERN TIMES": 5.0,
+      "MODERN PLASTICS II": 12.0,
+      "BRANDED CASES": 1.0
+    }
+  },
+  {
+    "account_number": 94870,
+    "account_name": "EXPERTS ON SIGHT",
+    "city": "GILBERT",
+    "total_decline": -312.14,
+    "current_year_total": 447.76,
+    "previous_year_total": 759.9,
+    "frame_purchases": {
+      "MODERN ART": -2.0,
+      "B.M.E.C.": 2.0,
+      "GENEVIEVE BOUTIQUE": 7.0,
+      "FASHIONTABULOUS": 1.0,
+      "GENEVIEVE PARIS DESIGN": 1.0,
+      "MODERN METALS": 12.0,
+      "MODERN PLASTICS II": 12.0,
+      "MODERN PLASTICS I": 1.0
+    }
+  },
+  {
+    "account_number": 86206,
+    "account_name": "EYE CARE SERVICES",
+    "city": "LAS VEGAS",
+    "total_decline": -304.67,
+    "current_year_total": 858.28,
+    "previous_year_total": 1162.95,
+    "frame_purchases": {
+      "MODERN METALS": 2.0,
+      "MODERN PLASTICS II": 84.0,
+      "MODERN PLASTICS I": 86.0
+    }
+  },
+  {
+    "account_number": 82715,
+    "account_name": "DR ELLEN MERKIN",
+    "city": "LAS VEGAS",
+    "total_decline": -299.91,
+    "current_year_total": 0.0,
+    "previous_year_total": 299.91,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 93858,
+    "account_name": "HOLLY ANDERSON OPTOMETRY",
+    "city": "AURORA",
+    "total_decline": -299.4,
+    "current_year_total": 848.3,
+    "previous_year_total": 1147.7,
+    "frame_purchases": {
+      "MODERN PLASTICS II": 170.0
+    }
+  },
+  {
+    "account_number": 87797,
+    "account_name": "OPTICAL EXPERTS",
+    "city": "PHOENIX",
+    "total_decline": -284.65,
+    "current_year_total": 0.0,
+    "previous_year_total": 284.65,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 87252,
+    "account_name": "OPTIC GALLERY #6",
+    "city": "LAS VEGAS",
+    "total_decline": -268.66,
+    "current_year_total": 4.99,
+    "previous_year_total": 273.65,
+    "frame_purchases": {
+      "MODERN PLASTICS I": 1.0
+    }
+  },
+  {
+    "account_number": 93025,
+    "account_name": "CASA GRANDE EYE CARE",
+    "city": "CASA GRANDE",
+    "total_decline": -260.0,
+    "current_year_total": 44.98,
+    "previous_year_total": 304.98,
+    "frame_purchases": {
+      "B.M.E.C.": 1.0,
+      "MODERN PLASTICS II": 2.0
+    }
+  },
+  {
+    "account_number": 82718,
+    "account_name": "DR. KEITH KOHORST",
+    "city": "PAHRUMP",
+    "total_decline": -220.05,
+    "current_year_total": 1771.6,
+    "previous_year_total": 1991.65,
+    "frame_purchases": {
+      "MODERN ART": 1.0,
+      "B.M.E.C.": 5.0,
+      "GB+ COLLECTION": 6.0,
+      "GENEVIEVE BOUTIQUE": 6.0,
+      "UROCK": 3.0,
+      "MODZ SUNZ": 2.0,
+      "GENEVIEVE PARIS DESIGN": 2.0,
+      "GIOVANI DI VENEZIA": 7.0,
+      "MODZ KIDS": 8.0,
+      "MODERN METALS": 16.0,
+      "MODERN PLASTICS II": 82.0,
+      "MODERN PLASTICS I": 42.0,
+      "BRANDED CASES": 2.0
+    }
+  },
+  {
+    "account_number": 86234,
+    "account_name": "AVANT GARDE EYECARE",
+    "city": "PEORIA",
+    "total_decline": -214.95,
+    "current_year_total": 1198.6,
+    "previous_year_total": 1413.55,
+    "frame_purchases": {
+      "G.V.X.": 1.0,
+      "MODZ TITANIUM": -1.0,
+      "MODZFLEX": -1.0,
+      "B.M.E.C.": 6.0,
+      "GB+ COLLECTION": 4.0,
+      "GENEVIEVE BOUTIQUE": 4.0,
+      "FASHIONTABULOUS": 8.0,
+      "UROCK": 2.0,
+      "GENEVIEVE PARIS DESIGN": 5.0,
+      "GIOVANI DI VENEZIA": 6.0,
+      "MODZ": -1.0,
+      "MODERN TIMES": 4.0,
+      "MODERN METALS": 4.0,
+      "MODERN PLASTICS II": 23.0,
+      "MODERN PLASTICS I": 13.0
+    }
+  },
+  {
+    "account_number": 88987,
+    "account_name": "CLASIK VISION CARE",
+    "city": "SAN TAN VALLEY",
+    "total_decline": -191.66,
+    "current_year_total": 14.97,
+    "previous_year_total": 206.63,
+    "frame_purchases": {
+      "MODERN PLASTICS II": 3.0
+    }
+  },
+  {
+    "account_number": 82464,
+    "account_name": "DESERT FAMILY VISION CENTER",
+    "city": "SAFFORD",
+    "total_decline": -183.04,
+    "current_year_total": 1360.98,
+    "previous_year_total": 1544.02,
+    "frame_purchases": {
+      "MODERN METALS": 1.0,
+      "MODERN PLASTICS I": 1.0,
+      "CASES - CLAMSHELL": 820.0,
+      "CASES - SLIP IN": 850.0
+    }
+  },
+  {
+    "account_number": 84165,
+    "account_name": "DAVID R BONIFACE OD",
+    "city": "CALEXICO",
+    "total_decline": -170.8,
+    "current_year_total": 4170.75,
+    "previous_year_total": 4341.55,
+    "frame_purchases": {
+      "MODERN METALS": 154.0,
+      "MODERN PLASTICS II": 484.0,
+      "MODERN PLASTICS I": 237.0
+    }
+  },
+  {
+    "account_number": 82919,
+    "account_name": "NEVADA EYECARE CHEYENNE",
+    "city": "LAS VEGAS",
+    "total_decline": -168.0,
+    "current_year_total": 0.0,
+    "previous_year_total": 168.0,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 87677,
+    "account_name": "AFFILIATED OPTICAL DESIGN",
+    "city": "PHOENIX",
+    "total_decline": -160.69,
+    "current_year_total": 0.0,
+    "previous_year_total": 160.69,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 88936,
+    "account_name": "AMERICAN VISION PARTNERS",
+    "city": "TEMPE",
+    "total_decline": -155.96,
+    "current_year_total": 0.0,
+    "previous_year_total": 155.96,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 84233,
+    "account_name": "EYE & COSMETIC SURGERY LLC",
+    "city": "HENDERSON",
+    "total_decline": -145.67,
+    "current_year_total": 1243.48,
+    "previous_year_total": 1389.15,
+    "frame_purchases": {
+      "GENEVIEVE BOUTIQUE": 2.0,
+      "UROCK": 4.0,
+      "MODERN TIMES": 22.0,
+      "MODERN METALS": 24.0,
+      "MODERN PLASTICS II": 115.0,
+      "MODERN PLASTICS I": 13.0,
+      "BRANDED CASES": 2.0
+    }
+  },
+  {
+    "account_number": 91002,
+    "account_name": "SMART SPECS OPTICAL",
+    "city": "FLAGSTAFF",
+    "total_decline": -133.98,
+    "current_year_total": 296.0,
+    "previous_year_total": 429.98,
+    "frame_purchases": {
+      "MODERN ART": 1.0,
+      "B.M.E.C.": 2.0,
+      "GENEVIEVE PARIS DESIGN": 5.0,
+      "MODZ KIDS": 2.0,
+      "BRANDED CASES": 3.0
+    }
+  },
+  {
+    "account_number": 71433,
+    "account_name": "LAS VEGAS FAMILY EYECARE",
+    "city": "LAS VEGAS",
+    "total_decline": -112.11,
+    "current_year_total": 5558.12,
+    "previous_year_total": 5670.23,
+    "frame_purchases": {
+      "MODERN ART": 12.0,
+      "B.M.E.C.": 15.0,
+      "GB+ COLLECTION": 32.0,
+      "GENEVIEVE BOUTIQUE": 7.0,
+      "UROCK": 3.0,
+      "GENEVIEVE PARIS DESIGN": 8.0,
+      "MODERN METALS": 117.0,
+      "MODERN PLASTICS II": 363.0,
+      "MODERN PLASTICS I": 138.0,
+      "PARTS": 300.0
+    }
+  },
+  {
+    "account_number": 92868,
+    "account_name": "FAMILY TREE EYE CARE",
+    "city": "GILBERT",
+    "total_decline": -93.72,
+    "current_year_total": 70.95,
+    "previous_year_total": 164.67,
+    "frame_purchases": {
+      "GENEVIEVE BOUTIQUE": 1.0,
+      "MODERN TIMES": 1.0,
+      "MODERN METALS": 1.0,
+      "MODERN PLASTICS II": 2.0,
+      "MODERN PLASTICS I": 2.0
+    }
+  },
+  {
+    "account_number": 80423,
+    "account_name": "CENTRAL PHOENIX EYEWEAR",
+    "city": "PHOENIX",
+    "total_decline": -87.0,
+    "current_year_total": 0.0,
+    "previous_year_total": 87.0,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 83381,
+    "account_name": "PAGE EYE CENTER",
+    "city": "PAGE",
+    "total_decline": -84.99,
+    "current_year_total": 10701.22,
+    "previous_year_total": 10786.21,
+    "frame_purchases": {
+      "MODZFLEX": 2.0,
+      "B.M.E.C.": 47.0,
+      "GB+ COLLECTION": 43.0,
+      "FASHIONTABULOUS": 1.0,
+      "MODERN TIMES": 128.0,
+      "MODERN METALS": 117.0,
+      "MODERN PLASTICS II": 409.0,
+      "MODERN PLASTICS I": 167.0,
+      "CASES - CLAMSHELL": 1030.0,
+      "BRANDED CASES": 115.0,
+      "CLEANING CLOTHS": 1600.0,
+      "NOSE PADS": 18.0
+    }
+  },
+  {
+    "account_number": 94227,
+    "account_name": "BLUE DIAMOND EYE CARE",
+    "city": "LAS VEGAS",
+    "total_decline": -73.2,
+    "current_year_total": 31.8,
+    "previous_year_total": 105.0,
+    "frame_purchases": {
+      "CASES - CLAMSHELL": 20.0
+    }
+  },
+  {
+    "account_number": 84903,
+    "account_name": "DR BRIAN K ANDERSON",
+    "city": "LAS VEGAS",
+    "total_decline": -70.0,
+    "current_year_total": 280.0,
+    "previous_year_total": 350.0,
+    "frame_purchases": {
+      "GB+ COLLECTION": 8.0
+    }
+  },
+  {
+    "account_number": 95412,
+    "account_name": "LIBBI A TRACY",
+    "city": "MESA",
+    "total_decline": -69.0,
+    "current_year_total": 0.0,
+    "previous_year_total": 69.0,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 93584,
+    "account_name": "NEIL K DICKERSON OD PLLC",
+    "city": "LAS VEGAS",
+    "total_decline": -54.94,
+    "current_year_total": 4.99,
+    "previous_year_total": 59.93,
+    "frame_purchases": {
+      "MODERN PLASTICS I": 1.0
+    }
+  },
+  {
+    "account_number": 72210,
+    "account_name": "BUENA VISTA EYE CARE",
+    "city": "TUCSON",
+    "total_decline": -41.94,
+    "current_year_total": 78.88,
+    "previous_year_total": 120.82,
+    "frame_purchases": {
+      "MODERN METALS": 3.0,
+      "MODERN PLASTICS II": 4.0,
+      "MODERN PLASTICS I": 5.0
+    }
+  },
+  {
+    "account_number": 80987,
+    "account_name": "PRIMARY EYE CARE CTR",
+    "city": "PHOENIX",
+    "total_decline": -40.06,
+    "current_year_total": 175.0,
+    "previous_year_total": 215.06,
+    "frame_purchases": {
+      "B.M.E.C.": 2.0,
+      "GB+ COLLECTION": 3.0
+    }
+  },
+  {
+    "account_number": 91039,
+    "account_name": "SPECTACLE",
+    "city": "LAS VEGAS",
+    "total_decline": -29.17,
+    "current_year_total": 2325.34,
+    "previous_year_total": 2354.51,
+    "frame_purchases": {
+      "MODERN METALS": 141.0,
+      "MODERN PLASTICS II": 267.0,
+      "MODERN PLASTICS I": 58.0
+    }
+  },
+  {
+    "account_number": 89408,
+    "account_name": "OPTIC GALLERY #7",
+    "city": "LAS VEGAS",
+    "total_decline": -24.95,
+    "current_year_total": 0.0,
+    "previous_year_total": 24.95,
+    "frame_purchases": {}
+  },
+  {
+    "account_number": 93415,
+    "account_name": "OPTIC GALLERY THE DISTRICT",
+    "city": "HENDERSON",
+    "total_decline": -9.98,
+    "current_year_total": 2180.63,
+    "previous_year_total": 2190.61,
+    "frame_purchases": {
+      "MODERN METALS": 78.0,
+      "MODERN PLASTICS II": 199.0,
+      "MODERN PLASTICS I": 160.0
+    }
+  },
+  {
+    "account_number": 94691,
+    "account_name": "NUVISION CENTERS",
+    "city": "GLENDALE",
+    "total_decline": -2.52,
+    "current_year_total": 7.5,
+    "previous_year_total": 10.02,
+    "frame_purchases": {
+      "MODERN TIMES": 1.0
+    }
+  }
+]

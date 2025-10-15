@@ -1,0 +1,217 @@
+{
+  "brands": [
+    {
+      "brand": "MODERN PLASTICS II",
+      "total_units": 21175,
+      "account_count": 108,
+      "avg_units_per_account": 196.06
+    },
+    {
+      "brand": "MODERN PLASTICS I",
+      "total_units": 11404,
+      "account_count": 94,
+      "avg_units_per_account": 121.32
+    },
+    {
+      "brand": "CASES - CLAMSHELL",
+      "total_units": 10434,
+      "account_count": 17,
+      "avg_units_per_account": 613.76
+    },
+    {
+      "brand": "MODERN METALS",
+      "total_units": 8201,
+      "account_count": 93,
+      "avg_units_per_account": 88.18
+    },
+    {
+      "brand": "CLEANING CLOTHS",
+      "total_units": 5600,
+      "account_count": 3,
+      "avg_units_per_account": 1866.67
+    },
+    {
+      "brand": "CASES - SLIP IN",
+      "total_units": 4740,
+      "account_count": 8,
+      "avg_units_per_account": 592.5
+    },
+    {
+      "brand": "NOSE PADS",
+      "total_units": 4483,
+      "account_count": 4,
+      "avg_units_per_account": 1120.75
+    },
+    {
+      "brand": "MODERN TIMES",
+      "total_units": 3479,
+      "account_count": 60,
+      "avg_units_per_account": 57.98
+    },
+    {
+      "brand": "BRANDED CASES",
+      "total_units": 2401,
+      "account_count": 40,
+      "avg_units_per_account": 60.02
+    },
+    {
+      "brand": "B.M.E.C.",
+      "total_units": 1405,
+      "account_count": 66,
+      "avg_units_per_account": 21.29
+    },
+    {
+      "brand": "GB+ COLLECTION",
+      "total_units": 1087,
+      "account_count": 50,
+      "avg_units_per_account": 21.74
+    },
+    {
+      "brand": "MODZ SUNZ",
+      "total_units": 1029,
+      "account_count": 11,
+      "avg_units_per_account": 93.55
+    },
+    {
+      "brand": "MODZ KIDS",
+      "total_units": 666,
+      "account_count": 36,
+      "avg_units_per_account": 18.5
+    },
+    {
+      "brand": "GENEVIEVE PARIS DESIGN",
+      "total_units": 506,
+      "account_count": 48,
+      "avg_units_per_account": 10.54
+    },
+    {
+      "brand": "GENEVIEVE BOUTIQUE",
+      "total_units": 459,
+      "account_count": 40,
+      "avg_units_per_account": 11.48
+    },
+    {
+      "brand": "MODZ",
+      "total_units": 326,
+      "account_count": 28,
+      "avg_units_per_account": 11.64
+    },
+    {
+      "brand": "PARTS",
+      "total_units": 300,
+      "account_count": 1,
+      "avg_units_per_account": 300.0
+    },
+    {
+      "brand": "GIOVANI DI VENEZIA",
+      "total_units": 293,
+      "account_count": 26,
+      "avg_units_per_account": 11.27
+    },
+    {
+      "brand": "MODERN ART",
+      "total_units": 125,
+      "account_count": 24,
+      "avg_units_per_account": 5.21
+    },
+    {
+      "brand": "UROCK",
+      "total_units": 99,
+      "account_count": 18,
+      "avg_units_per_account": 5.5
+    },
+    {
+      "brand": "MODZ TITANIUM",
+      "total_units": 86,
+      "account_count": 16,
+      "avg_units_per_account": 5.38
+    },
+    {
+      "brand": "G.V.X.",
+      "total_units": 64,
+      "account_count": 10,
+      "avg_units_per_account": 6.4
+    },
+    {
+      "brand": "MODZFLEX",
+      "total_units": 36,
+      "account_count": 11,
+      "avg_units_per_account": 3.27
+    },
+    {
+      "brand": "FASHIONTABULOUS",
+      "total_units": 36,
+      "account_count": 16,
+      "avg_units_per_account": 2.25
+    },
+    {
+      "brand": "TOOLS",
+      "total_units": 2,
+      "account_count": 2,
+      "avg_units_per_account": 1.0
+    }
+  ],
+  "top_brands": [
+    {
+      "brand": "MODERN PLASTICS II",
+      "total_units": 21175,
+      "account_count": 108,
+      "avg_units_per_account": 196.06
+    },
+    {
+      "brand": "MODERN PLASTICS I",
+      "total_units": 11404,
+      "account_count": 94,
+      "avg_units_per_account": 121.32
+    },
+    {
+      "brand": "CASES - CLAMSHELL",
+      "total_units": 10434,
+      "account_count": 17,
+      "avg_units_per_account": 613.76
+    },
+    {
+      "brand": "MODERN METALS",
+      "total_units": 8201,
+      "account_count": 93,
+      "avg_units_per_account": 88.18
+    },
+    {
+      "brand": "CLEANING CLOTHS",
+      "total_units": 5600,
+      "account_count": 3,
+      "avg_units_per_account": 1866.67
+    },
+    {
+      "brand": "CASES - SLIP IN",
+      "total_units": 4740,
+      "account_count": 8,
+      "avg_units_per_account": 592.5
+    },
+    {
+      "brand": "NOSE PADS",
+      "total_units": 4483,
+      "account_count": 4,
+      "avg_units_per_account": 1120.75
+    },
+    {
+      "brand": "MODERN TIMES",
+      "total_units": 3479,
+      "account_count": 60,
+      "avg_units_per_account": 57.98
+    },
+    {
+      "brand": "BRANDED CASES",
+      "total_units": 2401,
+      "account_count": 40,
+      "avg_units_per_account": 60.02
+    },
+    {
+      "brand": "B.M.E.C.",
+      "total_units": 1405,
+      "account_count": 66,
+      "avg_units_per_account": 21.29
+    }
+  ],
+  "total_brands_sold": 25
+}
