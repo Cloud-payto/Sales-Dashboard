@@ -4,11 +4,12 @@ import FramePerformanceChart from '../components/TrafficChart';
 import AccountsTable from '../components/AccountsTable';
 import BrandPerformance from '../components/BrandPerformance';
 import InsightsPanel from '../components/InsightsPanel';
-import { mockDashboardData } from '../data/mockData';
+// import { mockDashboardData } from '../data/mockData'; // Commented out - using real data now
+import dashboardData from '../data/sales_dashboard_data.json';
 
 const DashboardPage: React.FC = () => {
-  // Use mock data - replace with actual data from API
-  const { summary, accounts, frames, brands, insights } = mockDashboardData;
+  // Use real data from parser
+  const { summary, accounts, frames, brands, insights } = dashboardData;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
