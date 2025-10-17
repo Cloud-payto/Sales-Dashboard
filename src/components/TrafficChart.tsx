@@ -34,21 +34,23 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({ topGrowth
   const filteredGrowth = filterFramesOnly(topGrowth);
   const filteredDecline = filterFramesOnly(topDecline);
 
-  // Combine and prepare data for chart
-  const chartData = [
-    ...filteredDecline.slice(0, 5).map(frame => ({
-      name: frame.name,
-      change: frame.change,
-      pct_change: frame.pct_change,
-      type: 'decline'
-    })),
-    ...filteredGrowth.slice(0, 5).map(frame => ({
-      name: frame.name,
-      change: frame.change,
-      pct_change: frame.pct_change,
-      type: 'growth'
-    }))
-  ].sort((a, b) => a.change - b.change);
+  // Combine all frame categories and prepare data for chart
+  const allFrames = [...filteredGrowth, ...filteredDecline];
+
+  // Remove duplicates by name (keep the one with data)
+  const uniqueFrames = allFrames.reduce((acc, frame) => {
+    if (!acc.find(f => f.name === frame.name)) {
+      acc.push(frame);
+    }
+    return acc;
+  }, [] as FrameCategory[]);
+
+  const chartData = uniqueFrames.map(frame => ({
+    name: frame.name,
+    change: frame.change,
+    pct_change: frame.pct_change,
+    type: frame.change >= 0 ? 'growth' : 'decline'
+  })).sort((a, b) => a.change - b.change);
 
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat('en-US').format(Math.abs(value));
@@ -75,7 +77,7 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({ topGrowth
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-2">Frame Category Performance</h3>
-      <p className="text-sm text-gray-600 mb-6">Top 5 growing and declining categories (units YOY)</p>
+      <p className="text-sm text-gray-600 mb-6">All frame color categories (units YOY)</p>
       <ResponsiveContainer width="100%" height={400}>
         <BarChart
           data={chartData}
