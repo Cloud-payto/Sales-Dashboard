@@ -214,19 +214,11 @@ const DashboardPage: React.FC = () => {
             type="growing"
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <AccountsTable
-              accounts={accounts.new_accounts}
-              title="New Customers"
-              type="new"
-            />
-
-            <AccountsTable
-              accounts={accounts.reactivated_accounts}
-              title="Reactivated Customers"
-              type="reactivated"
-            />
-          </div>
+          <AccountsTable
+            accounts={[...accounts.new_accounts, ...accounts.reactivated_accounts]}
+            title="New & Reactivated Customers"
+            type="new"
+          />
         </div>
       </main>
     </div>

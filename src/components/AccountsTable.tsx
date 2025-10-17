@@ -10,7 +10,8 @@ interface AccountsTableProps {
 
 const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) => {
   const [sortField, setSortField] = useState<keyof Account>('Difference');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  // For declining accounts, start with 'asc' to show largest losses first (most negative)
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(type === 'declining' ? 'asc' : 'desc');
   const [displayCount, setDisplayCount] = useState<number>(10);
 
   const handleSort = (field: keyof Account) => {
