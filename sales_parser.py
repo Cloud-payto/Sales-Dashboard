@@ -389,9 +389,9 @@ class SalesDashboardParser:
         total_decline_amount = declining_accounts['Difference'].sum() if not declining_accounts.empty else 0
         total_increase_amount = increasing_accounts['Difference'].sum() if not increasing_accounts.empty else 0
 
-        # Top accounts
-        top_declining = declining_accounts.head(10).to_dict('records') if not declining_accounts.empty else []
-        top_increasing = increasing_accounts.head(10).to_dict('records') if not increasing_accounts.empty else []
+        # All declining and increasing accounts (not limited to 10)
+        top_declining = declining_accounts.to_dict('records') if not declining_accounts.empty else []
+        top_increasing = increasing_accounts.to_dict('records') if not increasing_accounts.empty else []
 
         # New and reactivated account details
         new_accounts_list = new_accounts.to_dict('records') if not new_accounts.empty else []
