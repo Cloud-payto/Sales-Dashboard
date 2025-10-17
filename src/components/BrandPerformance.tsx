@@ -5,9 +5,10 @@ import { Brand } from '../types';
 interface BrandPerformanceProps {
   brands: Brand[];
   showTop?: number;
+  totalAccounts?: number;
 }
 
-const BrandPerformance: React.FC<BrandPerformanceProps> = ({ brands, showTop = 10 }) => {
+const BrandPerformance: React.FC<BrandPerformanceProps> = ({ brands, showTop = 10, totalAccounts = 0 }) => {
   const [filterMode, setFilterMode] = useState<'all' | 'frames'>('all');
 
   // Filter brands based on selected mode
@@ -87,8 +88,13 @@ const BrandPerformance: React.FC<BrandPerformanceProps> = ({ brands, showTop = 1
                   <span className="font-semibold text-gray-900">
                     {formatNumber(brand.total_units)} units
                   </span>
-                  <span className="text-gray-600 w-20 text-right">
-                    {brand.account_count} accounts
+                  <span className="text-gray-600 text-right">
+                    {brand.account_count} customers
+                    {totalAccounts > 0 && (
+                      <span className="text-gray-500 ml-1">
+                        ({((brand.account_count / totalAccounts) * 100).toFixed(1)}%)
+                      </span>
+                    )}
                   </span>
                 </div>
               </div>
@@ -103,10 +109,10 @@ const BrandPerformance: React.FC<BrandPerformanceProps> = ({ brands, showTop = 1
                 </div>
               </div>
 
-              {/* Average per account */}
+              {/* Average per customer */}
               <div className="mt-1 ml-9">
                 <span className="text-xs text-gray-500">
-                  Avg: {brand.avg_units_per_account.toFixed(1)} units/account
+                  Avg: {brand.avg_units_per_account.toFixed(1)} units/customer
                 </span>
               </div>
             </div>

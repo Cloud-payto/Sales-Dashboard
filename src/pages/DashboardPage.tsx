@@ -197,7 +197,7 @@ const DashboardPage: React.FC = () => {
             topGrowth={frames.increasing}
             topDecline={frames.declining}
           />
-          <BrandPerformance brands={brands.brands} showTop={10} />
+          <BrandPerformance brands={brands.brands} showTop={10} totalAccounts={summary.total_accounts} />
         </div>
 
         {/* Customer Tables */}
