@@ -18,15 +18,31 @@ interface FramePerformanceChartProps {
 }
 
 const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({ topGrowth, topDecline }) => {
+  // Filter out non-frame items (cases, nose pads, parts, tools, cleaning cloths)
+  const filterFramesOnly = (categories: FrameCategory[]) => {
+    return categories.filter(frame => {
+      const name = frame.name.toLowerCase();
+      return !name.includes('case') &&
+             !name.includes('nose pad') &&
+             !name.includes('cleaning') &&
+             !name.includes('parts') &&
+             !name.includes('tools') &&
+             !name.includes('summit optical');
+    });
+  };
+
+  const filteredGrowth = filterFramesOnly(topGrowth);
+  const filteredDecline = filterFramesOnly(topDecline);
+
   // Combine and prepare data for chart
   const chartData = [
-    ...topDecline.slice(0, 5).map(frame => ({
+    ...filteredDecline.slice(0, 5).map(frame => ({
       name: frame.name,
       change: frame.change,
       pct_change: frame.pct_change,
       type: 'decline'
     })),
-    ...topGrowth.slice(0, 5).map(frame => ({
+    ...filteredGrowth.slice(0, 5).map(frame => ({
       name: frame.name,
       change: frame.change,
       pct_change: frame.pct_change,
