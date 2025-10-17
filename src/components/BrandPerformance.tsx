@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Package } from 'lucide-react';
 import { Brand } from '../types';
 
@@ -8,7 +8,21 @@ interface BrandPerformanceProps {
 }
 
 const BrandPerformance: React.FC<BrandPerformanceProps> = ({ brands, showTop = 10 }) => {
-  const topBrands = brands.slice(0, showTop);
+  const [filterMode, setFilterMode] = useState<'all' | 'frames'>('all');
+
+  // Filter brands based on selected mode
+  const filteredBrands = useMemo(() => {
+    if (filterMode === 'frames') {
+      // Exclude cases and cleaning cloths
+      return brands.filter(brand =>
+        !brand.brand.toLowerCase().includes('case') &&
+        !brand.brand.toLowerCase().includes('cleaning')
+      );
+    }
+    return brands;
+  }, [brands, filterMode]);
+
+  const topBrands = filteredBrands.slice(0, showTop);
   const maxUnits = Math.max(...topBrands.map(b => b.total_units));
 
   const formatNumber = (value: number) => {
@@ -17,11 +31,39 @@ const BrandPerformance: React.FC<BrandPerformanceProps> = ({ brands, showTop = 1
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <Package className="w-5 h-5 text-blue-600" />
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Top Brand Performance</h3>
-          <p className="text-sm text-gray-600">Units sold across all accounts</p>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Package className="w-5 h-5 text-blue-600" />
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Top Brand Performance</h3>
+            <p className="text-sm text-gray-600">
+              {filterMode === 'all' ? 'All products' : 'Frame brands only'}
+            </p>
+          </div>
+        </div>
+
+        {/* Toggle buttons */}
+        <div className="flex bg-gray-100 rounded-lg p-1">
+          <button
+            onClick={() => setFilterMode('all')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              filterMode === 'all'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            All Products
+          </button>
+          <button
+            onClick={() => setFilterMode('frames')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              filterMode === 'frames'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Frames Only
+          </button>
         </div>
       </div>
 
@@ -71,10 +113,10 @@ const BrandPerformance: React.FC<BrandPerformanceProps> = ({ brands, showTop = 1
         })}
       </div>
 
-      {brands.length > showTop && (
+      {filteredBrands.length > showTop && (
         <div className="mt-6 pt-4 border-t border-gray-200">
           <p className="text-sm text-gray-600 text-center">
-            +{brands.length - showTop} more brands
+            +{filteredBrands.length - showTop} more brands
           </p>
         </div>
       )}

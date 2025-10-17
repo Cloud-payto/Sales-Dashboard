@@ -1,11 +1,13 @@
-import React from 'react';
-import { AlertCircle, TrendingUp, AlertTriangle, Lightbulb } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertCircle, TrendingUp, AlertTriangle, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface InsightsPanelProps {
   insights: string[];
 }
 
 const InsightsPanel: React.FC<InsightsPanelProps> = ({ insights }) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
   const getInsightType = (insight: string): 'urgent' | 'alert' | 'opportunity' | 'info' => {
     if (insight.includes('URGENT')) return 'urgent';
     if (insight.includes('Alert') || insight.includes('declining')) return 'alert';
@@ -48,9 +50,25 @@ const InsightsPanel: React.FC<InsightsPanelProps> = ({ insights }) => {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Insights & Alerts</h3>
+      <div
+        className="flex items-center justify-between cursor-pointer mb-4"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <h3 className="text-lg font-semibold text-gray-900">Key Insights & Alerts</h3>
+        <button
+          className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+          aria-label={isExpanded ? "Collapse insights" : "Expand insights"}
+        >
+          {isExpanded ? (
+            <ChevronUp className="w-5 h-5 text-gray-600" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-gray-600" />
+          )}
+        </button>
+      </div>
 
-      <div className="space-y-3">
+      {isExpanded && (
+        <div className="space-y-3">
         {insights.map((insight, index) => {
           const type = getInsightType(insight);
           const style = getInsightStyle(type);
@@ -69,13 +87,14 @@ const InsightsPanel: React.FC<InsightsPanelProps> = ({ insights }) => {
             </div>
           );
         })}
-      </div>
 
-      {insights.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          <Lightbulb className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-          <p className="text-sm">No insights available</p>
-        </div>
+        {insights.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <Lightbulb className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+            <p className="text-sm">No insights available</p>
+          </div>
+        )}
+      </div>
       )}
     </div>
   );
