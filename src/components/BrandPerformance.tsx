@@ -13,10 +13,11 @@ const BrandPerformance: React.FC<BrandPerformanceProps> = ({ brands, showTop = 1
   // Filter brands based on selected mode
   const filteredBrands = useMemo(() => {
     if (filterMode === 'frames') {
-      // Exclude cases and cleaning cloths
+      // Exclude cases, cleaning cloths, and nose pads
       return brands.filter(brand =>
         !brand.brand.toLowerCase().includes('case') &&
-        !brand.brand.toLowerCase().includes('cleaning')
+        !brand.brand.toLowerCase().includes('cleaning') &&
+        !brand.brand.toLowerCase().includes('nose pad')
       );
     }
     return brands;
