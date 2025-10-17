@@ -105,27 +105,26 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({ topGrowth
       <ResponsiveContainer width="100%" height={400}>
         <BarChart
           data={chartData}
-          layout="vertical"
-          margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
+          margin={{ top: 5, right: 30, left: 20, bottom: 60 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
           <XAxis
-            type="number"
+            dataKey="name"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: '#4b5563', fontSize: 12 }}
+            angle={-45}
+            textAnchor="end"
+            height={60}
+          />
+          <YAxis
             axisLine={false}
             tickLine={false}
             tick={{ fill: '#9ca3af', fontSize: 12 }}
             tickFormatter={(value) => formatNumber(value)}
           />
-          <YAxis
-            type="category"
-            dataKey="name"
-            axisLine={false}
-            tickLine={false}
-            tick={{ fill: '#4b5563', fontSize: 12 }}
-            width={110}
-          />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }} />
-          <Bar dataKey="change" radius={[0, 4, 4, 0]}>
+          <Bar dataKey="change" radius={[4, 4, 0, 0]}>
             {chartData.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
