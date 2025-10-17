@@ -194,8 +194,8 @@ const DashboardPage: React.FC = () => {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FramePerformanceChart
-            topGrowth={frames.top_growth}
-            topDecline={frames.top_decline}
+            topGrowth={frames.increasing}
+            topDecline={frames.declining}
           />
           <BrandPerformance brands={brands.brands} showTop={10} />
         </div>
