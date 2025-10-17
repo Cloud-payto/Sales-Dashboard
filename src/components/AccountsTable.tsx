@@ -11,6 +11,7 @@ interface AccountsTableProps {
 const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) => {
   const [sortField, setSortField] = useState<keyof Account>('Difference');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [displayCount, setDisplayCount] = useState<number>(10);
 
   const handleSort = (field: keyof Account) => {
     if (sortField === field) {
@@ -133,7 +134,7 @@ const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) 
             </tr>
           </thead>
           <tbody>
-            {sortedAccounts.map((account, index) => (
+            {sortedAccounts.slice(0, displayCount).map((account, index) => (
               <tr
                 key={account['Acct #']}
                 className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${
@@ -169,6 +170,31 @@ const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) 
           </tbody>
         </table>
       </div>
+
+      {/* Show More / Show Less buttons */}
+      {accounts.length > 10 && (
+        <div className="mt-4 flex justify-center gap-3">
+          {displayCount < accounts.length && (
+            <button
+              onClick={() => setDisplayCount(prev => Math.min(prev + 10, accounts.length))}
+              className="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200"
+            >
+              Show More (+10)
+            </button>
+          )}
+          {displayCount > 10 && (
+            <button
+              onClick={() => setDisplayCount(10)}
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+            >
+              Show Less
+            </button>
+          )}
+          <span className="px-4 py-2 text-sm text-gray-500 self-center">
+            Showing {displayCount} of {accounts.length}
+          </span>
+        </div>
+      )}
     </div>
   );
 };
