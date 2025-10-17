@@ -45,12 +45,36 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({ topGrowth
     return acc;
   }, [] as FrameCategory[]);
 
+  // Define the desired order for frame categories
+  const frameOrder = [
+    'BLACK DIAMOND',
+    'YELLOW',
+    'RED',
+    'BLUE',
+    'GREEN',
+    'LIME'
+  ];
+
   const chartData = uniqueFrames.map(frame => ({
     name: frame.name,
     change: frame.change,
     pct_change: frame.pct_change,
     type: frame.change >= 0 ? 'growth' : 'decline'
-  })).sort((a, b) => a.change - b.change);
+  })).sort((a, b) => {
+    // Sort by the defined order
+    const indexA = frameOrder.indexOf(a.name.toUpperCase());
+    const indexB = frameOrder.indexOf(b.name.toUpperCase());
+
+    // If both are in the order list, sort by that order
+    if (indexA !== -1 && indexB !== -1) {
+      return indexA - indexB;
+    }
+    // If only one is in the order list, prioritize it
+    if (indexA !== -1) return -1;
+    if (indexB !== -1) return 1;
+    // Otherwise, sort alphabetically
+    return a.name.localeCompare(b.name);
+  });
 
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat('en-US').format(Math.abs(value));

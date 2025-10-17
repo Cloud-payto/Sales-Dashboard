@@ -68,8 +68,8 @@ const DashboardPage: React.FC = () => {
                   <p className="text-sm text-gray-600">Total sales, account averages, retention rates, and YOY comparisons</p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">👥 Account Health</h4>
-                  <p className="text-sm text-gray-600">Growing, declining, new, and reactivated accounts with detailed breakdowns</p>
+                  <h4 className="font-semibold text-gray-900 mb-2">👥 Customer Health</h4>
+                  <p className="text-sm text-gray-600">Growing, declining, new, and reactivated customers with detailed breakdowns</p>
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">📦 Product Performance</h4>
@@ -133,49 +133,49 @@ const DashboardPage: React.FC = () => {
               trend={summary.total_sales_pct_change > 0 ? 'up' : 'down'}
             />
             <MetricCard
-              label="Total Accounts"
+              label="Total Customers"
               value={formatNumber(summary.total_accounts)}
               subtitle={`${summary.total_accounts - summary.total_accounts_py} more than PY`}
               icon="accounts"
               trend="up"
             />
             <MetricCard
-              label="Account Average"
+              label="Customer Average"
               value={formatCurrency(summary.account_average)}
-              subtitle="Per account sales"
+              subtitle="Per customer sales"
               icon="average"
               trend="neutral"
             />
             <MetricCard
               label="Retention Rate"
               value={`${summary.retention_rate.toFixed(1)}%`}
-              subtitle={`${summary.lost_accounts} accounts lost`}
+              subtitle={`${summary.lost_accounts} customers lost`}
               icon="accounts"
               trend="up"
             />
           </div>
         </div>
 
-        {/* Account Performance Metrics */}
+        {/* Customer Performance Metrics */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Account Performance</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Customer Performance</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <MetricCard
-              label="Growing Accounts"
+              label="Growing Customers"
               value={formatNumber(summary.increasing_accounts)}
               changeLabel={formatCurrency(summary.increasing_accounts_sales)}
               icon="growing"
               trend="up"
             />
             <MetricCard
-              label="Declining Accounts"
+              label="Declining Customers"
               value={formatNumber(summary.declining_accounts)}
               changeLabel={formatCurrency(summary.declining_accounts_sales)}
               icon="declining"
               trend="down"
             />
             <MetricCard
-              label="New Accounts"
+              label="New Customers"
               value={formatNumber(summary.new_accounts)}
               changeLabel={formatCurrency(summary.new_accounts_sales)}
               icon="new"
@@ -200,30 +200,30 @@ const DashboardPage: React.FC = () => {
           <BrandPerformance brands={brands.brands} showTop={10} />
         </div>
 
-        {/* Accounts Tables */}
+        {/* Customer Tables */}
         <div className="space-y-6">
           <AccountsTable
             accounts={accounts.top_declining}
-            title="Top Declining Accounts"
+            title="Bottom Performing Customers"
             type="declining"
           />
 
           <AccountsTable
             accounts={accounts.top_increasing}
-            title="Top Growing Accounts"
+            title="Top Performing Customers"
             type="growing"
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <AccountsTable
               accounts={accounts.new_accounts}
-              title="New Accounts"
+              title="New Customers"
               type="new"
             />
 
             <AccountsTable
               accounts={accounts.reactivated_accounts}
-              title="Reactivated Accounts"
+              title="Reactivated Customers"
               type="reactivated"
             />
           </div>

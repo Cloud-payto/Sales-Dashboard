@@ -68,7 +68,7 @@ const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) 
       <div className="flex items-center gap-3 mb-6">
         {getIcon()}
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        <span className="ml-auto text-sm text-gray-500">{accounts.length} accounts</span>
+        <span className="ml-auto text-sm text-gray-500">{accounts.length} customers</span>
       </div>
 
       <div className="overflow-x-auto">
@@ -80,7 +80,7 @@ const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) 
                 onClick={() => handleSort('Acct #')}
               >
                 <div className="flex items-center gap-1">
-                  Account #
+                  Customer #
                   <SortIcon field="Acct #" />
                 </div>
               </th>
