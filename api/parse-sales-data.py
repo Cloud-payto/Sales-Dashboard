@@ -11,22 +11,27 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 try:
-    from sales_parser import SalesDashboardParser
+    from sales_comparison_parser import SalesComparisonParser
     import pandas as pd
 except ImportError:
     # Fallback if parser not available
-    SalesDashboardParser = None
+    SalesComparisonParser = None
     pd = None
 
 def parse_multipart_form_data(data, boundary):
-    """Parse multipart/form-data to extract file"""
+    """Parse multipart/form-data to extract BOTH files"""
     parts = data.split(boundary.encode())
+    files = {}
 
     for part in parts:
         if b'Content-Disposition' in part and b'filename=' in part:
+            # Extract field name
+            name_match = re.search(rb'name="([^"]+)"', part)
             # Extract filename
             filename_match = re.search(rb'filename="([^"]+)"', part)
-            if filename_match:
+
+            if name_match and filename_match:
+                field_name = name_match.group(1).decode('utf-8')
                 filename = filename_match.group(1).decode('utf-8')
 
                 # Find the file content (after double CRLF)
@@ -36,9 +41,13 @@ def parse_multipart_form_data(data, boundary):
                     # Remove trailing CRLF
                     if file_content.endswith(b'\r\n'):
                         file_content = file_content[:-2]
-                    return filename, file_content
 
-    return None, None
+                    files[field_name] = {
+                        'filename': filename,
+                        'content': file_content
+                    }
+
+    return files
 
 def clean_nan_values(obj):
     """Recursively clean NaN values from nested dictionaries and lists"""
@@ -66,18 +75,19 @@ def json_serializer(obj):
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
-        """Handle file upload and parse sales data"""
-        temp_file_path = None
+        """Handle TWO file uploads and parse sales comparison data"""
+        previous_year_temp = None
+        current_year_temp = None
         try:
             # Check if parser is available
-            if SalesDashboardParser is None:
+            if SalesComparisonParser is None:
                 self.send_response(500)
                 self.send_header('Content-type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
 
                 error_response = {
-                    'error': 'Sales parser not available',
+                    'error': 'Sales comparison parser not available',
                     'message': 'Parser module could not be imported'
                 }
                 self.wfile.write(json.dumps(error_response).encode())
@@ -99,29 +109,37 @@ class handler(BaseHTTPRequestHandler):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
 
-            # Parse multipart data to extract file
-            filename, file_content = parse_multipart_form_data(post_data, boundary)
+            # Parse multipart data to extract BOTH files
+            files = parse_multipart_form_data(post_data, boundary)
 
-            if not file_content:
-                raise ValueError('No file found in upload')
+            if 'previousYearFile' not in files or 'currentYearFile' not in files:
+                raise ValueError('Both previousYearFile and currentYearFile are required')
 
-            # Save file temporarily
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as temp_file:
-                temp_file.write(file_content)
-                temp_file_path = temp_file.name
+            # Save previous year file temporarily
+            with tempfile.NamedTemporaryFile(delete=False, suffix='_py.xlsx') as temp_file:
+                temp_file.write(files['previousYearFile']['content'])
+                previous_year_temp = temp_file.name
 
-            # Parse the Excel file
-            parser = SalesDashboardParser(temp_file_path)
+            # Save current year file temporarily
+            with tempfile.NamedTemporaryFile(delete=False, suffix='_cy.xlsx') as temp_file:
+                temp_file.write(files['currentYearFile']['content'])
+                current_year_temp = temp_file.name
+
+            # Parse BOTH Excel files with comparison parser
+            parser = SalesComparisonParser(previous_year_temp, current_year_temp)
             parser.load_data()
-            dashboard_data = parser.get_dashboard_summary()
+            dashboard_data = parser.get_complete_comparison_summary()
 
             # Clean NaN values from the data
             dashboard_data = clean_nan_values(dashboard_data)
 
-            # Clean up temp file
-            if temp_file_path and os.path.exists(temp_file_path):
-                os.remove(temp_file_path)
-                temp_file_path = None
+            # Clean up temp files
+            if previous_year_temp and os.path.exists(previous_year_temp):
+                os.remove(previous_year_temp)
+                previous_year_temp = None
+            if current_year_temp and os.path.exists(current_year_temp):
+                os.remove(current_year_temp)
+                current_year_temp = None
 
             # Return success with parsed data
             self.send_response(200)
@@ -131,17 +149,22 @@ class handler(BaseHTTPRequestHandler):
 
             response = {
                 'success': True,
-                'message': 'File processed successfully',
+                'message': 'Files processed successfully with brand-level comparison',
                 'data': dashboard_data
             }
 
             self.wfile.write(json.dumps(response, default=json_serializer).encode())
 
         except Exception as e:
-            # Clean up temp file on error
-            if temp_file_path and os.path.exists(temp_file_path):
+            # Clean up temp files on error
+            if previous_year_temp and os.path.exists(previous_year_temp):
                 try:
-                    os.remove(temp_file_path)
+                    os.remove(previous_year_temp)
+                except:
+                    pass
+            if current_year_temp and os.path.exists(current_year_temp):
+                try:
+                    os.remove(current_year_temp)
                 except:
                     pass
 
@@ -153,7 +176,7 @@ class handler(BaseHTTPRequestHandler):
 
             error_response = {
                 'error': str(e),
-                'message': 'Failed to process file'
+                'message': 'Failed to process files'
             }
             self.wfile.write(json.dumps(error_response).encode())
 
