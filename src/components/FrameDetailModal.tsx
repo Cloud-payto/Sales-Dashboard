@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, TrendingDown, TrendingUp, AlertCircle } from 'lucide-react';
-import { Account } from '../types';
+import { ColorGroupDrillDown } from '../types';
 
 interface FrameDetailModalProps {
   frameName: string;
@@ -12,29 +12,25 @@ interface FrameDetailModalProps {
     previous_year: number;
     type: 'growth' | 'decline';
   };
-  decliningAccounts: Account[];
+  drillDownData: ColorGroupDrillDown;
   onClose: () => void;
 }
 
 const FrameDetailModal: React.FC<FrameDetailModalProps> = ({
   frameName,
   frameData,
-  decliningAccounts,
+  drillDownData,
   onClose
 }) => {
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat('en-US').format(Math.abs(value));
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
-    }).format(value);
-  };
-
-  const topDeclining = decliningAccounts.slice(0, 10);
+  // Combine lost and declining customers (both represent missed opportunities)
+  const missedOpportunities = [
+    ...drillDownData.lost_customers,
+    ...drillDownData.declining_customers
+  ].sort((a, b) => a.change - b.change).slice(0, 15); // Top 15 worst cases
 
   return (
     <>
@@ -126,11 +122,11 @@ const FrameDetailModal: React.FC<FrameDetailModalProps> = ({
               </div>
             </div>
 
-            {/* Declining Customers Table */}
-            {frameData.type === 'decline' && decliningAccounts.length > 0 && (
+            {/* Missed Opportunities Table */}
+            {frameData.type === 'decline' && missedOpportunities.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Top Declining Customers to Target
+                  Customers Who Stopped/Reduced Buying {frameName}
                 </h3>
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
                   <table className="w-full">
@@ -142,48 +138,68 @@ const FrameDetailModal: React.FC<FrameDetailModalProps> = ({
                         <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                           City
                         </th>
-                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">
-                          Current Year
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                          Brands
                         </th>
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">
-                          Previous Year
+                          PY Units
                         </th>
                         <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">
-                          Decline
+                          CY Units
+                        </th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">
+                          Loss
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {topDeclining.map((account, index) => (
+                      {missedOpportunities.map((customer, index) => (
                         <tr
-                          key={account['Acct #']}
+                          key={customer.account_number}
                           className={`border-t border-gray-100 ${
                             index === 0 ? 'bg-yellow-50' : 'hover:bg-gray-50'
                           }`}
                         >
                           <td className="py-3 px-4 text-sm font-medium text-gray-900">
-                            {account.Name}
+                            {customer.account_name}
                           </td>
                           <td className="py-3 px-4 text-sm text-gray-600">
-                            {account.City}
+                            {customer.city}
+                          </td>
+                          <td className="py-3 px-4 text-xs text-gray-600">
+                            {customer.brands.map(b => b.brand).join(', ')}
                           </td>
                           <td className="py-3 px-4 text-sm text-right text-gray-900">
-                            {formatCurrency(account['CY Total'])}
+                            {customer.previous_year_units}
                           </td>
                           <td className="py-3 px-4 text-sm text-right text-gray-600">
-                            {formatCurrency(account['PY Total'])}
+                            {customer.current_year_units}
                           </td>
                           <td className="py-3 px-4 text-sm text-right font-semibold text-red-600">
-                            {formatCurrency(account.Difference)}
+                            {customer.change}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+                <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
+                  <div className="bg-red-50 p-3 rounded-lg">
+                    <div className="text-red-900 font-semibold">{drillDownData.lost_count} Lost</div>
+                    <div className="text-red-700 text-xs">Bought PY, not buying CY</div>
+                  </div>
+                  <div className="bg-orange-50 p-3 rounded-lg">
+                    <div className="text-orange-900 font-semibold">{drillDownData.declining_count} Declining</div>
+                    <div className="text-orange-700 text-xs">Reduced purchases</div>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <div className="text-green-900 font-semibold">{drillDownData.growing_count} Growing</div>
+                    <div className="text-green-700 text-xs">Increased purchases</div>
+                  </div>
+                </div>
                 <p className="text-sm text-gray-500 mt-3">
-                  Showing top {topDeclining.length} of {decliningAccounts.length} declining customers.
-                  These accounts represent your missed potential for {frameName.toLowerCase()} sales.
+                  Showing top {missedOpportunities.length} customers who stopped or reduced buying {frameName.toLowerCase()} frames.
+                  These are your priority re-engagement targets.
                 </p>
               </div>
             )}

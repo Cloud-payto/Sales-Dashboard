@@ -84,7 +84,7 @@ const DashboardPage: React.FC = () => {
   }
 
   // Dashboard with data
-  const { summary, accounts, frames, brands, insights } = dashboardData;
+  const { summary, accounts, frames, brands, insights, brand_comparison } = dashboardData;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -196,6 +196,7 @@ const DashboardPage: React.FC = () => {
           <FramePerformanceChart
             topGrowth={frames.increasing}
             topDecline={frames.declining}
+            colorGroupDrillDowns={brand_comparison?.color_group_drill_downs}
           />
           <BrandPerformance brands={brands.brands} showTop={10} totalAccounts={summary.total_accounts} />
         </div>

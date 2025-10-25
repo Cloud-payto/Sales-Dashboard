@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -10,14 +10,25 @@ import {
   Legend,
   Cell
 } from 'recharts';
-import { FrameCategory } from '../types';
+import { FrameCategory, ColorGroupDrillDown } from '../types';
+import FrameDetailModal from './FrameDetailModal';
 
 interface FramePerformanceChartProps {
   topGrowth: FrameCategory[];
   topDecline: FrameCategory[];
+  colorGroupDrillDowns?: { [colorGroup: string]: ColorGroupDrillDown };
 }
 
-const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({ topGrowth, topDecline }) => {
+const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({
+  topGrowth,
+  topDecline,
+  colorGroupDrillDowns
+}) => {
+  const [selectedFrame, setSelectedFrame] = useState<{
+    name: string;
+    data: any;
+    drillDown: ColorGroupDrillDown | null;
+  } | null>(null);
   // Filter out non-frame items (cases, nose pads, parts, tools, cleaning cloths)
   const filterFramesOnly = (categories: FrameCategory[]) => {
     return categories.filter(frame => {
@@ -59,6 +70,8 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({ topGrowth
     name: frame.name,
     change: frame.change,
     pct_change: frame.pct_change,
+    current_year: frame.current_year,
+    previous_year: frame.previous_year,
     type: frame.change >= 0 ? 'growth' : 'decline'
   })).sort((a, b) => {
     // Sort by the defined order
@@ -75,6 +88,17 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({ topGrowth
     // Otherwise, sort alphabetically
     return a.name.localeCompare(b.name);
   });
+
+  const handleBarClick = (data: any) => {
+    // Get drill-down data for this color group if available
+    const drillDown = colorGroupDrillDowns?.[data.name.toUpperCase()] || null;
+
+    setSelectedFrame({
+      name: data.name,
+      data: data,
+      drillDown: drillDown
+    });
+  };
 
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat('en-US').format(Math.abs(value));
@@ -124,7 +148,12 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({ topGrowth
             tickFormatter={(value) => formatNumber(value)}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }} />
-          <Bar dataKey="change" radius={[4, 4, 0, 0]}>
+          <Bar
+            dataKey="change"
+            radius={[4, 4, 0, 0]}
+            onClick={handleBarClick}
+            cursor="pointer"
+          >
             {chartData.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
@@ -134,6 +163,28 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({ topGrowth
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+
+      {/* Hint for users */}
+      <p className="text-xs text-gray-500 text-center mt-3">
+        Click on any bar to see customer drill-down
+      </p>
+
+      {/* Frame Detail Modal */}
+      {selectedFrame && selectedFrame.drillDown && (
+        <FrameDetailModal
+          frameName={selectedFrame.name}
+          frameData={{
+            name: selectedFrame.data.name,
+            change: selectedFrame.data.change,
+            pct_change: selectedFrame.data.pct_change,
+            current_year: selectedFrame.data.current_year,
+            previous_year: selectedFrame.data.previous_year,
+            type: selectedFrame.data.type
+          }}
+          drillDownData={selectedFrame.drillDown}
+          onClose={() => setSelectedFrame(null)}
+        />
+      )}
     </div>
   );
 };

@@ -84,10 +84,54 @@ export interface AccountsData {
   reactivated_accounts: Account[];
 }
 
+export interface CustomerBrandChange {
+  account_number: number;
+  account_name: string;
+  city: string;
+  color_group: string;
+  previous_year_units: number;
+  current_year_units: number;
+  change: number;
+  brands: {
+    brand: string;
+    previous_year_units: number;
+    current_year_units: number;
+    change: number;
+  }[];
+}
+
+export interface ColorGroupDrillDown {
+  color_group: string;
+  total_customers_with_activity: number;
+  declining_customers: CustomerBrandChange[];
+  declining_count: number;
+  growing_customers: CustomerBrandChange[];
+  growing_count: number;
+  lost_customers: CustomerBrandChange[];
+  lost_count: number;
+  new_customers: CustomerBrandChange[];
+  new_count: number;
+  total_change_units: number;
+}
+
+export interface BrandComparison {
+  all_customer_brand_changes: any[];
+  color_group_drill_downs: {
+    [colorGroup: string]: ColorGroupDrillDown;
+  };
+  comparison_metadata: {
+    previous_year_file: string;
+    current_year_file: string;
+    total_brands_tracked: number;
+    total_color_groups: number;
+  };
+}
+
 export interface DashboardData {
   summary: SalesSummary;
   accounts: AccountsData;
   frames: FrameData;
   brands: BrandData;
   insights: string[];
+  brand_comparison?: BrandComparison;
 }
