@@ -32,6 +32,12 @@ const FrameDetailModal: React.FC<FrameDetailModalProps> = ({
     ...drillDownData.declining_customers
   ].sort((a, b) => a.change - b.change).slice(0, 15); // Top 15 worst cases
 
+  // Combine growing and new customers (both represent growth opportunities)
+  const growthOpportunities = [
+    ...drillDownData.growing_customers,
+    ...drillDownData.new_customers
+  ].sort((a, b) => b.change - a.change).slice(0, 15); // Top 15 best cases
+
   return (
     <>
       {/* Backdrop */}
@@ -204,18 +210,84 @@ const FrameDetailModal: React.FC<FrameDetailModalProps> = ({
               </div>
             )}
 
-            {/* For growing frames */}
-            {frameData.type === 'growth' && (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="w-8 h-8 text-green-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Great Performance!
+            {/* Growth Opportunities Table */}
+            {frameData.type === 'growth' && growthOpportunities.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Customers Driving Growth in {frameName}
                 </h3>
-                <p className="text-gray-600 max-w-md mx-auto">
-                  Your {frameName.toLowerCase()} category is up {formatNumber(frameData.change)} units.
-                  Keep up the momentum by continuing to promote these products across your territory.
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                          Customer
+                        </th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                          City
+                        </th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                          Brands
+                        </th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">
+                          PY Units
+                        </th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">
+                          CY Units
+                        </th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">
+                          Growth
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {growthOpportunities.map((customer, index) => (
+                        <tr
+                          key={customer.account_number}
+                          className={`border-t border-gray-100 ${
+                            index === 0 ? 'bg-green-50' : 'hover:bg-gray-50'
+                          }`}
+                        >
+                          <td className="py-3 px-4 text-sm font-medium text-gray-900">
+                            {customer.account_name}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-600">
+                            {customer.city}
+                          </td>
+                          <td className="py-3 px-4 text-xs text-gray-600">
+                            {customer.brands.map(b => b.brand).join(', ')}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-right text-gray-600">
+                            {customer.previous_year_units}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-right text-gray-900">
+                            {customer.current_year_units}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-right font-semibold text-green-600">
+                            +{customer.change}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <div className="text-green-900 font-semibold">{drillDownData.growing_count} Growing</div>
+                    <div className="text-green-700 text-xs">Increased purchases</div>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="text-blue-900 font-semibold">{drillDownData.new_count} New</div>
+                    <div className="text-blue-700 text-xs">Started buying this year</div>
+                  </div>
+                  <div className="bg-orange-50 p-3 rounded-lg">
+                    <div className="text-orange-900 font-semibold">{drillDownData.declining_count} Declining</div>
+                    <div className="text-orange-700 text-xs">Reduced purchases</div>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500 mt-3">
+                  Showing top {growthOpportunities.length} customers driving growth in {frameName.toLowerCase()} frames.
+                  These accounts show strong demand - consider upselling or expanding their product mix.
                 </p>
               </div>
             )}
