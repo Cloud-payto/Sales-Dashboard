@@ -193,11 +193,11 @@ class SalesComparisonParser:
 
         customers = list(customer_totals.values())
 
-        # Categorize customers
-        declining = [c for c in customers if c['change'] < 0]
-        growing = [c for c in customers if c['change'] > 0]
+        # Categorize customers (mutually exclusive categories)
         lost = [c for c in customers if c['previous_year_units'] > 0 and c['current_year_units'] == 0]
         new = [c for c in customers if c['previous_year_units'] == 0 and c['current_year_units'] > 0]
+        declining = [c for c in customers if c['change'] < 0 and c['current_year_units'] > 0]  # Exclude lost (CY must be > 0)
+        growing = [c for c in customers if c['change'] > 0 and c['previous_year_units'] > 0]  # Exclude new (PY must be > 0)
 
         # Sort by impact (largest declines first)
         declining.sort(key=lambda x: x['change'])
