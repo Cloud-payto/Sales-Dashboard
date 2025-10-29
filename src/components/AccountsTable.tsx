@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, TrendingDown, TrendingUp, UserPlus, UserCheck, Filter, X } from 'lucide-react';
 import { Account } from '../types';
+import AccountDetailModal from './AccountDetailModal';
 
 interface AccountsTableProps {
   accounts: Account[];
@@ -15,6 +16,7 @@ const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) 
   const [displayCount, setDisplayCount] = useState<number>(10);
   const [showCityFilter, setShowCityFilter] = useState<boolean>(false);
   const [selectedCities, setSelectedCities] = useState<Set<string>>(new Set());
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
   // Get unique cities from accounts
   const uniqueCities = useMemo(() => {
@@ -238,7 +240,8 @@ const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) 
             {sortedAccounts.slice(0, displayCount).map((account, index) => (
               <tr
                 key={account['Acct #']}
-                className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${
+                onClick={() => setSelectedAccount(account)}
+                className={`border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors ${
                   index === 0 ? 'bg-yellow-50' : ''
                 }`}
               >
@@ -295,6 +298,14 @@ const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) 
             Showing {Math.min(displayCount, filteredAccounts.length)} of {filteredAccounts.length}
           </span>
         </div>
+      )}
+
+      {/* Account Detail Modal */}
+      {selectedAccount && (
+        <AccountDetailModal
+          account={selectedAccount}
+          onClose={() => setSelectedAccount(null)}
+        />
       )}
     </div>
   );

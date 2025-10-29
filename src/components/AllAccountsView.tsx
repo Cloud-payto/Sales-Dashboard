@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowUpDown, Search } from 'lucide-react';
 import { Account } from '../types';
+import AccountDetailModal from './AccountDetailModal';
 
 interface AllAccountsViewProps {
   accounts: Account[];
@@ -13,6 +14,7 @@ const AllAccountsView: React.FC<AllAccountsViewProps> = ({ accounts }) => {
   const [sortField, setSortField] = useState<SortField>('CY Total');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -143,7 +145,8 @@ const AllAccountsView: React.FC<AllAccountsViewProps> = ({ accounts }) => {
               return (
                 <tr
                   key={account['Acct #']}
-                  className={`border-t border-gray-100 hover:bg-gray-50 ${
+                  onClick={() => setSelectedAccount(account)}
+                  className={`border-t border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors ${
                     index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
                   }`}
                 >
@@ -199,6 +202,18 @@ const AllAccountsView: React.FC<AllAccountsViewProps> = ({ accounts }) => {
         <div className="text-center py-12">
           <p className="text-gray-500">No accounts found matching your search.</p>
         </div>
+      )}
+
+      <p className="text-xs text-gray-500 text-center mt-4">
+        Click on any account to view detailed analytics
+      </p>
+
+      {/* Account Detail Modal */}
+      {selectedAccount && (
+        <AccountDetailModal
+          account={selectedAccount}
+          onClose={() => setSelectedAccount(null)}
+        />
       )}
     </div>
   );
