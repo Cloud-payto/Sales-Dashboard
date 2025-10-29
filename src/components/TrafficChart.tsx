@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import {
   BarChart,
   Bar,
+  PieChart,
+  Pie,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -100,6 +102,24 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({
     });
   };
 
+  // Calculate market share data for pie chart
+  const totalUnits = chartData.reduce((sum, frame) => sum + frame.current_year, 0);
+  const pieData = chartData.map(frame => ({
+    name: frame.name,
+    value: frame.current_year,
+    percentage: ((frame.current_year / totalUnits) * 100).toFixed(1)
+  }));
+
+  // Define colors for pie chart (matching the frame categories)
+  const COLORS: { [key: string]: string } = {
+    'BLACK DIAMOND': '#1a1a1a',
+    'YELLOW': '#eab308',
+    'RED': '#ef4444',
+    'BLUE': '#3b82f6',
+    'GREEN': '#22c55e',
+    'LIME': '#84cc16'
+  };
+
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat('en-US').format(Math.abs(value));
   };
@@ -115,6 +135,24 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({
           </p>
           <p className={`text-sm ${data.type === 'growth' ? 'text-green-600' : 'text-red-600'}`}>
             {data.pct_change > 0 ? '+' : ''}{data.pct_change.toFixed(1)}%
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const PieTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0];
+      return (
+        <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+          <p className="font-medium text-gray-900 mb-1">{data.name}</p>
+          <p className="text-sm text-gray-700">
+            {formatNumber(data.value)} units
+          </p>
+          <p className="text-sm font-semibold text-blue-600">
+            {data.payload.percentage}% market share
           </p>
         </div>
       );
@@ -168,6 +206,31 @@ const FramePerformanceChart: React.FC<FramePerformanceChartProps> = ({
       <p className="text-xs text-gray-500 text-center mt-3">
         Click on any bar to see customer drill-down
       </p>
+
+      {/* Market Share Pie Chart */}
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Market Share by Color Group</h3>
+        <p className="text-sm text-gray-600 mb-6">Current year distribution (%)</p>
+        <ResponsiveContainer width="100%" height={400}>
+          <PieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={({ name, percentage }) => `${name} ${percentage}%`}
+              outerRadius={120}
+              fill="#8884d8"
+              dataKey="value"
+            >
+              {pieData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[entry.name.toUpperCase()] || '#94a3b8'} />
+              ))}
+            </Pie>
+            <Tooltip content={<PieTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
 
       {/* Frame Detail Modal */}
       {selectedFrame && selectedFrame.drillDown && (
