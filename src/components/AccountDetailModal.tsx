@@ -27,16 +27,18 @@ const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, brandC
   // Panel configuration state
   type ChartType = 'pie' | 'bar';
   type TimePeriod = 'cy' | 'py';
+  type DataType = 'frames' | 'sales';
 
   interface ChartPanel {
     id: string;
     chartType: ChartType;
     timePeriod: TimePeriod;
+    dataType: DataType;
   }
 
   const [panels, setPanels] = useState<ChartPanel[]>([
-    { id: '1', chartType: 'pie', timePeriod: 'cy' },
-    { id: '2', chartType: 'bar', timePeriod: 'cy' }
+    { id: '1', chartType: 'pie', timePeriod: 'cy', dataType: 'frames' },
+    { id: '2', chartType: 'bar', timePeriod: 'cy', dataType: 'frames' }
   ]);
 
   // Load notes from localStorage on mount
@@ -131,7 +133,7 @@ const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, brandC
   // Panel management functions
   const addPanel = () => {
     const newId = (Math.max(...panels.map(p => parseInt(p.id)), 0) + 1).toString();
-    setPanels([...panels, { id: newId, chartType: 'pie', timePeriod: 'cy' }]);
+    setPanels([...panels, { id: newId, chartType: 'pie', timePeriod: 'cy', dataType: 'frames' }]);
   };
 
   const removePanel = (id: string) => {
@@ -143,6 +145,14 @@ const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, brandC
   const updatePanel = (id: string, updates: Partial<ChartPanel>) => {
     setPanels(panels.map(p => p.id === id ? { ...p, ...updates } : p));
   };
+
+  // Sales data for comparison (simple CY vs PY)
+  const salesData = useMemo(() => {
+    return {
+      cy: [{ label: 'Current Year', value: account['CY Total'], color: isGrowing ? '#22c55e' : '#ef4444' }],
+      py: [{ label: 'Previous Year', value: account['PY Total'], color: '#94a3b8' }]
+    };
+  }, [account, isGrowing]);
 
   // YOY Comparison Bar Chart Data
   const barChartData = [
@@ -297,9 +307,20 @@ const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, brandC
             </div>
 
             {/* Customizable Chart Panels */}
-            <div className={`grid gap-6 mb-6 ${panels.length === 1 ? 'grid-cols-1' : panels.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+            <div className={`grid gap-6 mb-6 ${panels.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
               {panels.map((panel) => {
-                const panelData = panel.timePeriod === 'cy' ? colorGroupData.cy : colorGroupData.py;
+                // Get the appropriate data based on panel configuration
+                let panelData: any[];
+                let dataLabel: string;
+
+                if (panel.dataType === 'frames') {
+                  panelData = panel.timePeriod === 'cy' ? colorGroupData.cy : colorGroupData.py;
+                  dataLabel = 'Frame Colors';
+                } else {
+                  panelData = panel.timePeriod === 'cy' ? salesData.cy : salesData.py;
+                  dataLabel = 'Sales';
+                }
+
                 const periodLabel = panel.timePeriod === 'cy' ? 'CY' : 'PY';
 
                 return (
@@ -307,7 +328,7 @@ const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, brandC
                     {/* Panel Controls */}
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-sm font-semibold text-gray-900">
-                        Frame Colors ({periodLabel})
+                        {dataLabel} ({periodLabel})
                       </h3>
                       {panels.length > 1 && (
                         <button
@@ -321,7 +342,31 @@ const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, brandC
                     </div>
 
                     {/* Panel Toggle Buttons */}
-                    <div className="flex gap-2 mb-3">
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {/* Data Type Toggles */}
+                      <div className="flex gap-1 bg-white rounded-lg p-1">
+                        <button
+                          onClick={() => updatePanel(panel.id, { dataType: 'frames' })}
+                          className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                            panel.dataType === 'frames'
+                              ? 'bg-purple-600 text-white'
+                              : 'text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          Frames
+                        </button>
+                        <button
+                          onClick={() => updatePanel(panel.id, { dataType: 'sales' })}
+                          className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                            panel.dataType === 'sales'
+                              ? 'bg-purple-600 text-white'
+                              : 'text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          Sales
+                        </button>
+                      </div>
+
                       {/* Chart Type Toggles */}
                       <div className="flex gap-1 bg-white rounded-lg p-1">
                         <button
@@ -380,30 +425,48 @@ const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, brandC
                               data={panelData}
                               cx="50%"
                               cy="50%"
-                              labelLine={true}
-                              label={({ color_group, percentage }) => {
-                                const shortName = color_group.split(' ')[0];
-                                return `${shortName} ${percentage.toFixed(1)}%`;
-                              }}
+                              labelLine={panel.dataType === 'frames'}
+                              label={panel.dataType === 'frames'
+                                ? ({ color_group, percentage }) => {
+                                    const shortName = color_group.split(' ')[0];
+                                    return `${shortName} ${percentage.toFixed(1)}%`;
+                                  }
+                                : ({ label }) => label
+                              }
                               outerRadius={80}
                               fill="#8884d8"
-                              dataKey="units"
+                              dataKey={panel.dataType === 'frames' ? 'units' : 'value'}
                             >
                               {panelData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLOR_MAP[entry.color_group] || '#94a3b8'} />
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={panel.dataType === 'frames'
+                                    ? (COLOR_MAP[entry.color_group] || '#94a3b8')
+                                    : entry.color
+                                  }
+                                />
                               ))}
                             </Pie>
                             <Tooltip
                               content={({ active, payload }: any) => {
                                 if (active && payload && payload.length) {
                                   const data = payload[0].payload;
-                                  return (
-                                    <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
-                                      <p className="font-medium text-gray-900 mb-1">{data.color_group}</p>
-                                      <p className="text-sm text-gray-700">{data.units} units</p>
-                                      <p className="text-sm text-blue-600">{data.percentage.toFixed(1)}%</p>
-                                    </div>
-                                  );
+                                  if (panel.dataType === 'frames') {
+                                    return (
+                                      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+                                        <p className="font-medium text-gray-900 mb-1">{data.color_group}</p>
+                                        <p className="text-sm text-gray-700">{data.units} units</p>
+                                        <p className="text-sm text-blue-600">{data.percentage.toFixed(1)}%</p>
+                                      </div>
+                                    );
+                                  } else {
+                                    return (
+                                      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+                                        <p className="font-medium text-gray-900 mb-1">{data.label}</p>
+                                        <p className="text-sm text-gray-700">{formatCurrency(data.value)}</p>
+                                      </div>
+                                    );
+                                  }
                                 }
                                 return null;
                               }}
@@ -413,37 +476,53 @@ const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, brandC
                           <BarChart data={panelData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                             <XAxis
-                              dataKey="color_group"
+                              dataKey={panel.dataType === 'frames' ? 'color_group' : 'label'}
                               axisLine={false}
                               tickLine={false}
                               tick={{ fill: '#6b7280', fontSize: 10 }}
-                              angle={-45}
-                              textAnchor="end"
-                              height={60}
+                              angle={panel.dataType === 'frames' ? -45 : 0}
+                              textAnchor={panel.dataType === 'frames' ? 'end' : 'middle'}
+                              height={panel.dataType === 'frames' ? 60 : 40}
                             />
                             <YAxis
                               axisLine={false}
                               tickLine={false}
                               tick={{ fill: '#9ca3af', fontSize: 12 }}
+                              tickFormatter={panel.dataType === 'sales' ? (value) => `$${(value / 1000).toFixed(0)}k` : undefined}
                             />
                             <Tooltip
                               content={({ active, payload }: any) => {
                                 if (active && payload && payload.length) {
                                   const data = payload[0].payload;
-                                  return (
-                                    <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
-                                      <p className="font-medium text-gray-900 mb-1">{data.color_group}</p>
-                                      <p className="text-sm text-gray-700">{data.units} units</p>
-                                      <p className="text-sm text-blue-600">{data.percentage.toFixed(1)}%</p>
-                                    </div>
-                                  );
+                                  if (panel.dataType === 'frames') {
+                                    return (
+                                      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+                                        <p className="font-medium text-gray-900 mb-1">{data.color_group}</p>
+                                        <p className="text-sm text-gray-700">{data.units} units</p>
+                                        <p className="text-sm text-blue-600">{data.percentage.toFixed(1)}%</p>
+                                      </div>
+                                    );
+                                  } else {
+                                    return (
+                                      <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+                                        <p className="font-medium text-gray-900 mb-1">{data.label}</p>
+                                        <p className="text-sm text-gray-700">{formatCurrency(data.value)}</p>
+                                      </div>
+                                    );
+                                  }
                                 }
                                 return null;
                               }}
                             />
-                            <Bar dataKey="units" radius={[4, 4, 0, 0]}>
+                            <Bar dataKey={panel.dataType === 'frames' ? 'units' : 'value'} radius={[4, 4, 0, 0]}>
                               {panelData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLOR_MAP[entry.color_group] || '#94a3b8'} />
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={panel.dataType === 'frames'
+                                    ? (COLOR_MAP[entry.color_group] || '#94a3b8')
+                                    : entry.color
+                                  }
+                                />
                               ))}
                             </Bar>
                           </BarChart>
