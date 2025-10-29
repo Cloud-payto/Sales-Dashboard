@@ -266,18 +266,21 @@ const DashboardPage: React.FC = () => {
             accounts={accounts.top_declining}
             title="Bottom Performing Customers"
             type="declining"
+            brandComparison={brand_comparison?.all_customer_brand_changes}
           />
 
           <AccountsTable
             accounts={accounts.top_increasing}
             title="Top Performing Customers"
             type="growing"
+            brandComparison={brand_comparison?.all_customer_brand_changes}
           />
 
           <AccountsTable
             accounts={[...accounts.new_accounts, ...accounts.reactivated_accounts]}
             title="New & Reactivated Customers"
             type="new"
+            brandComparison={brand_comparison?.all_customer_brand_changes}
           />
         </div>
           </>
@@ -291,6 +294,7 @@ const DashboardPage: React.FC = () => {
                 ...accounts.new_accounts,
                 ...accounts.reactivated_accounts
               ]}
+              brandComparison={brand_comparison?.all_customer_brand_changes}
             />
           </>
         )}

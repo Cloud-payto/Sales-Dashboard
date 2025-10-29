@@ -1,18 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowUpDown, Search } from 'lucide-react';
-import { Account } from '../types';
-import { useDashboard } from '../contexts/DashboardContext';
+import { Account, CustomerBrandChange } from '../types';
 import AccountDetailModal from './AccountDetailModal';
 
 interface AllAccountsViewProps {
   accounts: Account[];
+  brandComparison?: CustomerBrandChange[];
 }
 
 type SortField = 'Name' | 'City' | 'CY Total' | 'PY Total' | 'Difference';
 type SortDirection = 'asc' | 'desc';
 
-const AllAccountsView: React.FC<AllAccountsViewProps> = ({ accounts }) => {
-  const { dashboardData } = useDashboard();
+const AllAccountsView: React.FC<AllAccountsViewProps> = ({ accounts, brandComparison }) => {
   const [sortField, setSortField] = useState<SortField>('CY Total');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchTerm, setSearchTerm] = useState('');
@@ -214,7 +213,7 @@ const AllAccountsView: React.FC<AllAccountsViewProps> = ({ accounts }) => {
       {selectedAccount && (
         <AccountDetailModal
           account={selectedAccount}
-          brandComparison={dashboardData?.brand_comparison?.all_customer_brand_changes}
+          brandComparison={brandComparison}
           onClose={() => setSelectedAccount(null)}
         />
       )}
