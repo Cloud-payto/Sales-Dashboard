@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, TrendingDown, TrendingUp, UserPlus, UserCheck, Filter, X } from 'lucide-react';
 import { Account } from '../types';
 import AccountDetailModal from './AccountDetailModal';
+import { useDashboard } from '../contexts/DashboardContext';
 
 interface AccountsTableProps {
   accounts: Account[];
@@ -9,6 +10,7 @@ interface AccountsTableProps {
   type: 'declining' | 'growing' | 'new' | 'reactivated';
 }
 
+  const { dashboardData } = useDashboard();
 const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) => {
   const [sortField, setSortField] = useState<keyof Account>('Difference');
   // For declining accounts, start with 'asc' to show largest losses first (most negative)
@@ -304,6 +306,7 @@ const AccountsTable: React.FC<AccountsTableProps> = ({ accounts, title, type }) 
       {selectedAccount && (
         <AccountDetailModal
           account={selectedAccount}
+          brandComparison={dashboardData?.brand_comparison?.all_customer_brand_changes}
           onClose={() => setSelectedAccount(null)}
         />
       )}

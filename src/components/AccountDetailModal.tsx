@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, TrendingUp, TrendingDown, Award, Tag, FileText, Save } from 'lucide-react';
 import {
   BarChart,
@@ -12,16 +12,18 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
-import { Account } from '../types';
+import { Account, CustomerBrandChange } from '../types';
 
 interface AccountDetailModalProps {
   account: Account;
+  brandComparison?: CustomerBrandChange[];
   onClose: () => void;
 }
 
-const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, onClose }) => {
+const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, brandComparison, onClose }) => {
   const [notes, setNotes] = useState('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [showCurrentYear, setShowCurrentYear] = useState(true); // Toggle between CY and PY
 
   // Load notes from localStorage on mount
   useEffect(() => {
@@ -50,6 +52,70 @@ const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, onClos
 
   const isGrowing = account.Difference > 0;
   const isNew = account['PY Total'] === 0;
+
+  // Color Group Breakdown (from brand comparison data)
+  const colorGroupData = useMemo(() => {
+    if (!brandComparison || brandComparison.length === 0) {
+      return { cy: [], py: [] };
+    }
+
+    // Filter to this account
+    const accountBrands = brandComparison.filter(
+      b => b.account_number === account['Acct #']
+    );
+
+    if (accountBrands.length === 0) {
+      return { cy: [], py: [] };
+    }
+
+    // Aggregate by color group
+    const colorTotalsCY: { [key: string]: number } = {};
+    const colorTotalsPY: { [key: string]: number } = {};
+
+    accountBrands.forEach(brand => {
+      const color = brand.color_group;
+      colorTotalsCY[color] = (colorTotalsCY[color] || 0) + brand.current_year_units;
+      colorTotalsPY[color] = (colorTotalsPY[color] || 0) + brand.previous_year_units;
+    });
+
+    // Calculate totals
+    const totalCY = Object.values(colorTotalsCY).reduce((sum, val) => sum + val, 0);
+    const totalPY = Object.values(colorTotalsPY).reduce((sum, val) => sum + val, 0);
+
+    // Convert to arrays with percentages
+    const colorsCY = Object.entries(colorTotalsCY)
+      .filter(([_, units]) => units > 0)
+      .map(([color, units]) => ({
+        color_group: color,
+        units,
+        percentage: totalCY > 0 ? (units / totalCY * 100) : 0
+      }))
+      .sort((a, b) => b.units - a.units);
+
+    const colorsPY = Object.entries(colorTotalsPY)
+      .filter(([_, units]) => units > 0)
+      .map(([color, units]) => ({
+        color_group: color,
+        units,
+        percentage: totalPY > 0 ? (units / totalPY * 100) : 0
+      }))
+      .sort((a, b) => b.units - a.units);
+
+    return { cy: colorsCY, py: colorsPY };
+  }, [brandComparison, account]);
+
+  // Define colors for pie/bar charts (matching frame categories)
+  const COLOR_MAP: { [key: string]: string } = {
+    'BLACK DIAMOND': '#1a1a1a',
+    'YELLOW': '#eab308',
+    'RED': '#ef4444',
+    'BLUE': '#3b82f6',
+    'GREEN': '#22c55e',
+    'LIME': '#84cc16'
+  };
+
+  // Current color group data to display based on toggle
+  const activeColorData = showCurrentYear ? colorGroupData.cy : colorGroupData.py;
 
   // YOY Comparison Bar Chart Data
   const barChartData = [
@@ -192,58 +258,128 @@ const AccountDetailModal: React.FC<AccountDetailModalProps> = ({ account, onClos
               </div>
             </div>
 
+            {/* Toggle Button */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <button
+                onClick={() => setShowCurrentYear(false)}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                  !showCurrentYear
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Previous Year
+              </button>
+              <button
+                onClick={() => setShowCurrentYear(true)}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                  showCurrentYear
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Current Year
+              </button>
+            </div>
+
             {/* Charts Section */}
             <div className="grid grid-cols-2 gap-6 mb-6">
-              {/* YOY Bar Chart */}
+              {/* Color Group Pie Chart */}
               <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Year-Over-Year Comparison</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={barChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                    <XAxis
-                      dataKey="period"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: '#6b7280', fontSize: 12 }}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: '#9ca3af', fontSize: 12 }}
-                      tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                    />
-                    <Tooltip content={<CustomBarTooltip />} />
-                    <Bar dataKey="sales" radius={[4, 4, 0, 0]}>
-                      {barChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Frame Color Distribution ({showCurrentYear ? 'CY' : 'PY'})
+                </h3>
+                {activeColorData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={activeColorData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ color_group, percentage }) => `${color_group} ${percentage.toFixed(1)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="units"
+                      >
+                        {activeColorData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLOR_MAP[entry.color_group] || '#94a3b8'} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        content={({ active, payload }: any) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+                                <p className="font-medium text-gray-900 mb-1">{data.color_group}</p>
+                                <p className="text-sm text-gray-700">{data.units} units</p>
+                                <p className="text-sm text-blue-600">{data.percentage.toFixed(1)}%</p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[250px] flex items-center justify-center text-gray-500">
+                    No frame data available
+                  </div>
+                )}
               </div>
 
-              {/* Sales Distribution Pie Chart */}
+              {/* Color Group Bar Chart */}
               <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Sales Distribution</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                  <PieChart>
-                    <Pie
-                      data={pieChartData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {pieChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomPieTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Frame Units by Color ({showCurrentYear ? 'CY' : 'PY'})
+                </h3>
+                {activeColorData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={activeColorData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                      <XAxis
+                        dataKey="color_group"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#6b7280', fontSize: 10 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#9ca3af', fontSize: 12 }}
+                      />
+                      <Tooltip
+                        content={({ active, payload }: any) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
+                                <p className="font-medium text-gray-900 mb-1">{data.color_group}</p>
+                                <p className="text-sm text-gray-700">{data.units} units</p>
+                                <p className="text-sm text-blue-600">{data.percentage.toFixed(1)}%</p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar dataKey="units" radius={[4, 4, 0, 0]}>
+                        {activeColorData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLOR_MAP[entry.color_group] || '#94a3b8'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[250px] flex items-center justify-center text-gray-500">
+                    No frame data available
+                  </div>
+                )}
               </div>
             </div>
 

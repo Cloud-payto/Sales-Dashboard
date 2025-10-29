@@ -149,6 +149,76 @@ class SalesComparisonParser:
 
         return changes
 
+    def get_account_color_breakdown(self, account_number: int) -> Dict:
+        """
+        Get color group breakdown for a specific account
+
+        Args:
+            account_number: Account number to analyze
+
+        Returns:
+            Dictionary with color group breakdown for this account
+        """
+        all_changes = self.get_customer_brand_changes()
+
+        # Filter to this account
+        account_changes = [c for c in all_changes if c['account_number'] == account_number]
+
+        if not account_changes:
+            return {
+                'account_number': account_number,
+                'color_groups_cy': [],
+                'color_groups_py': []
+            }
+
+        # Aggregate by color group for Current Year
+        color_totals_cy = {}
+        color_totals_py = {}
+
+        for change in account_changes:
+            color = change['color_group']
+
+            if color not in color_totals_cy:
+                color_totals_cy[color] = 0
+                color_totals_py[color] = 0
+
+            color_totals_cy[color] += change['current_year_units']
+            color_totals_py[color] += change['previous_year_units']
+
+        # Convert to list format with percentages
+        total_cy = sum(color_totals_cy.values())
+        total_py = sum(color_totals_py.values())
+
+        color_groups_cy = []
+        color_groups_py = []
+
+        for color in color_totals_cy.keys():
+            if color_totals_cy[color] > 0:
+                color_groups_cy.append({
+                    'color_group': color,
+                    'units': color_totals_cy[color],
+                    'percentage': (color_totals_cy[color] / total_cy * 100) if total_cy > 0 else 0
+                })
+
+            if color_totals_py[color] > 0:
+                color_groups_py.append({
+                    'color_group': color,
+                    'units': color_totals_py[color],
+                    'percentage': (color_totals_py[color] / total_py * 100) if total_py > 0 else 0
+                })
+
+        # Sort by units descending
+        color_groups_cy.sort(key=lambda x: x['units'], reverse=True)
+        color_groups_py.sort(key=lambda x: x['units'], reverse=True)
+
+        return {
+            'account_number': account_number,
+            'color_groups_cy': color_groups_cy,
+            'color_groups_py': color_groups_py,
+            'total_units_cy': total_cy,
+            'total_units_py': total_py
+        }
+
     def get_color_group_drill_down(self, color_group: str) -> Dict:
         """
         Get detailed drill-down for a specific color group
