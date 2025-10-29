@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, BarChart3 } from 'lucide-react';
+import { Upload, BarChart3, ChevronDown } from 'lucide-react';
 import { useDashboard } from '../contexts/DashboardContext';
 import MetricCard from '../components/MetricCard';
 import FramePerformanceChart from '../components/TrafficChart';
 import AccountsTable from '../components/AccountsTable';
 import BrandPerformance from '../components/BrandPerformance';
 import InsightsPanel from '../components/InsightsPanel';
+import AllAccountsView from '../components/AllAccountsView';
+
+type ViewMode = 'territory' | 'accounts';
 
 const DashboardPage: React.FC = () => {
   const { dashboardData, isLoading } = useDashboard();
+  const [viewMode, setViewMode] = useState<ViewMode>('territory');
+  const [showViewDropdown, setShowViewDropdown] = useState(false);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -92,12 +97,64 @@ const DashboardPage: React.FC = () => {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Sales Analytics Dashboard</h1>
-              <p className="text-gray-600 mt-2">
-                Year-over-year performance overview and insights
-              </p>
+            <div className="flex items-center gap-6">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Sales Analytics Dashboard</h1>
+                <p className="text-gray-600 mt-2">
+                  Year-over-year performance overview and insights
+                </p>
+              </div>
+
+              {/* View Switcher Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowViewDropdown(!showViewDropdown)}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium text-gray-700"
+                >
+                  {viewMode === 'territory' ? 'Territory Overview' : 'All Accounts'}
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+
+                {showViewDropdown && (
+                  <>
+                    {/* Backdrop */}
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setShowViewDropdown(false)}
+                    />
+
+                    {/* Dropdown Menu */}
+                    <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                      <button
+                        onClick={() => {
+                          setViewMode('territory');
+                          setShowViewDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors ${
+                          viewMode === 'territory' ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-700'
+                        }`}
+                      >
+                        <div className="font-medium">Territory Overview</div>
+                        <div className="text-xs text-gray-500 mt-0.5">Performance metrics & insights</div>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setViewMode('accounts');
+                          setShowViewDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors border-t border-gray-100 ${
+                          viewMode === 'accounts' ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-700'
+                        }`}
+                      >
+                        <div className="font-medium">All Accounts</div>
+                        <div className="text-xs text-gray-500 mt-0.5">Complete customer list with sorting</div>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
+
             <div className="flex items-center gap-4">
               <Link
                 to="/upload"
@@ -117,8 +174,10 @@ const DashboardPage: React.FC = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Key Insights Panel */}
-        <InsightsPanel insights={insights} />
+        {viewMode === 'territory' ? (
+          <>
+            {/* Key Insights Panel */}
+            <InsightsPanel insights={insights} />
 
         {/* Primary Metrics Grid */}
         <div>
@@ -221,6 +280,20 @@ const DashboardPage: React.FC = () => {
             type="new"
           />
         </div>
+          </>
+        ) : (
+          <>
+            {/* All Accounts View */}
+            <AllAccountsView
+              accounts={[
+                ...accounts.top_declining,
+                ...accounts.top_increasing,
+                ...accounts.new_accounts,
+                ...accounts.reactivated_accounts
+              ]}
+            />
+          </>
+        )}
       </main>
     </div>
   );
