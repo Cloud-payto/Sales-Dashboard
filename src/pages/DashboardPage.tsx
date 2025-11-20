@@ -8,6 +8,8 @@ import AccountsTable from '../components/AccountsTable';
 import BrandPerformance from '../components/BrandPerformance';
 import InsightsPanel from '../components/InsightsPanel';
 import AllAccountsView from '../components/AllAccountsView';
+import AccountsPerBrand from '../components/AccountsPerBrand';
+import SalesPerWorkingDay from '../components/SalesPerWorkingDay';
 
 type ViewMode = 'territory' | 'accounts';
 
@@ -89,7 +91,7 @@ const DashboardPage: React.FC = () => {
   }
 
   // Dashboard with data
-  const { summary, accounts, frames, brands, insights, brand_comparison } = dashboardData;
+  const { summary, accounts, frames, brands, insights, brand_comparison, accounts_per_brand, sales_per_working_day } = dashboardData;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -250,6 +252,11 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Sales per Working Day */}
+        {sales_per_working_day && (
+          <SalesPerWorkingDay data={sales_per_working_day} />
+        )}
+
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FramePerformanceChart
@@ -259,6 +266,11 @@ const DashboardPage: React.FC = () => {
           />
           <BrandPerformance brands={brands.brands} showTop={10} totalAccounts={summary.total_accounts} />
         </div>
+
+        {/* Accounts per Brand */}
+        {accounts_per_brand && (
+          <AccountsPerBrand data={accounts_per_brand} />
+        )}
 
         {/* Customer Tables */}
         <div className="space-y-6">

@@ -127,6 +127,53 @@ export interface BrandComparison {
   };
 }
 
+export interface QualifyingAccount {
+  account_number: number;
+  account_name: string;
+  units: number;
+}
+
+export interface BrandAccountMetric {
+  brand: string;
+  color_group: string;
+  accounts_buying_12_plus: number;
+  total_accounts_buying: number;
+  total_units: number;
+  qualifying_accounts: QualifyingAccount[];
+}
+
+export interface AccountsPerBrand {
+  threshold: number;
+  current_year: BrandAccountMetric[];
+  previous_year: BrandAccountMetric[];
+  summary: {
+    cy_total_qualifying_accounts: number;
+    py_total_qualifying_accounts: number;
+    cy_avg_accounts_per_brand: number;
+    py_avg_accounts_per_brand: number;
+  };
+}
+
+export interface DateRange {
+  start_date: string;
+  end_date: string;
+  total_days: number;
+}
+
+export interface SalesPerWorkingDay {
+  date_range: DateRange;
+  working_days: number;
+  weekend_days: number;
+  bank_holidays: number;
+  sales_per_working_day_cy: number;
+  sales_per_working_day_py: number;
+  total_sales_cy: number;
+  total_sales_py: number;
+  change_per_day: number;
+  pct_change_per_day: number;
+  error?: string;
+}
+
 export interface DashboardData {
   summary: SalesSummary;
   accounts: AccountsData;
@@ -134,4 +181,6 @@ export interface DashboardData {
   brands: BrandData;
   insights: string[];
   brand_comparison?: BrandComparison;
+  accounts_per_brand?: AccountsPerBrand;
+  sales_per_working_day?: SalesPerWorkingDay;
 }

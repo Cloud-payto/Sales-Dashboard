@@ -26,6 +26,10 @@ A comprehensive Year-over-Year (YOY) sales analytics dashboard for sales represe
 - **New Accounts**: First-time buyers with project codes
 - **Reactivated Accounts**: Previously inactive accounts coming back
 
+### NEW: Advanced Analytics
+- **Accounts per Brand (12+ Units)**: Identify brand penetration by showing which accounts purchase 12 or more units from each brand, with CY/PY comparison and qualifying account lists
+- **Sales per Working Day**: Calculate average daily sales excluding weekends and major US bank holidays for accurate performance normalization
+
 ### Features
 - **Sortable Tables**: Click column headers to sort by any field
 - **Color-Coded Indicators**: Red for declines, green for growth, blue for new

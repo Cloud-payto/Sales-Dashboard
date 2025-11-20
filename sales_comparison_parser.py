@@ -5,9 +5,11 @@ Compares two YOY Excel files to extract brand-level customer insights
 
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+import re
+import os
 
 
 class SalesComparisonParser:
@@ -45,6 +47,15 @@ class SalesComparisonParser:
         # Lime
         'MODERN PLASTICS I': 'LIME',
     }
+
+    # US Federal Bank Holidays (fixed dates and rules)
+    BANK_HOLIDAYS = [
+        # Format: (month, day) for fixed holidays
+        (1, 1),    # New Year's Day
+        (7, 4),    # Independence Day
+        (11, 11),  # Veterans Day
+        (12, 25),  # Christmas Day
+    ]
 
     def __init__(self, previous_year_path: str, current_year_path: str):
         """
@@ -289,6 +300,276 @@ class SalesComparisonParser:
             'total_change_units': sum(c['change'] for c in customers)
         }
 
+    def get_accounts_per_brand(self, threshold: int = 12) -> Dict:
+        """
+        Calculate how many accounts buy threshold+ units from each brand
+
+        Args:
+            threshold: Minimum units to qualify (default: 12)
+
+        Returns:
+            Dictionary with accounts per brand metrics for CY and PY
+        """
+        brand_metrics_cy = {}
+        brand_metrics_py = {}
+
+        # Initialize metrics for all tracked brands
+        for brand in self.brand_columns:
+            brand_metrics_cy[brand] = {
+                'brand': brand,
+                'color_group': self.BRAND_COLOR_MAP.get(brand, 'OTHER'),
+                'accounts_buying_12_plus': 0,
+                'total_accounts_buying': 0,
+                'total_units': 0,
+                'qualifying_accounts': []
+            }
+            brand_metrics_py[brand] = {
+                'brand': brand,
+                'color_group': self.BRAND_COLOR_MAP.get(brand, 'OTHER'),
+                'accounts_buying_12_plus': 0,
+                'total_accounts_buying': 0,
+                'total_units': 0,
+                'qualifying_accounts': []
+            }
+
+        # Analyze current year data
+        for _, row in self.current_year_data.iterrows():
+            acct_num = row.get('Acct #', 0)
+            acct_name = row.get('Name', 'Unknown')
+
+            for brand in self.brand_columns:
+                if brand in row and pd.notna(row[brand]):
+                    units = int(row[brand]) if isinstance(row[brand], (int, float)) else 0
+
+                    if units > 0:
+                        brand_metrics_cy[brand]['total_accounts_buying'] += 1
+                        brand_metrics_cy[brand]['total_units'] += units
+
+                        if units >= threshold:
+                            brand_metrics_cy[brand]['accounts_buying_12_plus'] += 1
+                            brand_metrics_cy[brand]['qualifying_accounts'].append({
+                                'account_number': int(acct_num) if pd.notna(acct_num) else 0,
+                                'account_name': str(acct_name),
+                                'units': units
+                            })
+
+        # Analyze previous year data
+        for _, row in self.previous_year_data.iterrows():
+            acct_num = row.get('Acct #', 0)
+            acct_name = row.get('Name', 'Unknown')
+
+            for brand in self.brand_columns:
+                if brand in row and pd.notna(row[brand]):
+                    units = int(row[brand]) if isinstance(row[brand], (int, float)) else 0
+
+                    if units > 0:
+                        brand_metrics_py[brand]['total_accounts_buying'] += 1
+                        brand_metrics_py[brand]['total_units'] += units
+
+                        if units >= threshold:
+                            brand_metrics_py[brand]['accounts_buying_12_plus'] += 1
+                            brand_metrics_py[brand]['qualifying_accounts'].append({
+                                'account_number': int(acct_num) if pd.notna(acct_num) else 0,
+                                'account_name': str(acct_name),
+                                'units': units
+                            })
+
+        # Sort qualifying accounts by units for each brand
+        for brand in self.brand_columns:
+            brand_metrics_cy[brand]['qualifying_accounts'].sort(
+                key=lambda x: x['units'], reverse=True
+            )
+            brand_metrics_py[brand]['qualifying_accounts'].sort(
+                key=lambda x: x['units'], reverse=True
+            )
+
+        # Convert to lists and sort by accounts_buying_12_plus
+        brands_cy = list(brand_metrics_cy.values())
+        brands_py = list(brand_metrics_py.values())
+
+        brands_cy.sort(key=lambda x: x['accounts_buying_12_plus'], reverse=True)
+        brands_py.sort(key=lambda x: x['accounts_buying_12_plus'], reverse=True)
+
+        return {
+            'threshold': threshold,
+            'current_year': brands_cy,
+            'previous_year': brands_py,
+            'summary': {
+                'cy_total_qualifying_accounts': sum(b['accounts_buying_12_plus'] for b in brands_cy),
+                'py_total_qualifying_accounts': sum(b['accounts_buying_12_plus'] for b in brands_py),
+                'cy_avg_accounts_per_brand': sum(b['accounts_buying_12_plus'] for b in brands_cy) / len(brands_cy) if brands_cy else 0,
+                'py_avg_accounts_per_brand': sum(b['accounts_buying_12_plus'] for b in brands_py) / len(brands_py) if brands_py else 0
+            }
+        }
+
+    def _extract_dates_from_filename(self, file_path: str) -> Optional[Tuple[datetime, datetime]]:
+        """
+        Extract start and end dates from filename pattern like 'Payton YOY 8-18-24 to 8-19-25.xlsx'
+
+        Args:
+            file_path: Path to the Excel file
+
+        Returns:
+            Tuple of (start_date, end_date) or None if not found
+        """
+        filename = os.path.basename(file_path)
+
+        # Pattern: Month-Day-Year to Month-Day-Year
+        pattern = r'(\d{1,2})-(\d{1,2})-(\d{2,4})\s+to\s+(\d{1,2})-(\d{1,2})-(\d{2,4})'
+        match = re.search(pattern, filename)
+
+        if match:
+            start_month, start_day, start_year, end_month, end_day, end_year = match.groups()
+
+            # Convert 2-digit years to 4-digit
+            start_year = int(start_year)
+            if start_year < 100:
+                start_year += 2000
+
+            end_year = int(end_year)
+            if end_year < 100:
+                end_year += 2000
+
+            try:
+                start_date = datetime(start_year, int(start_month), int(start_day))
+                end_date = datetime(end_year, int(end_month), int(end_day))
+                return (start_date, end_date)
+            except ValueError:
+                return None
+
+        return None
+
+    def _get_bank_holidays(self, year: int) -> List[datetime]:
+        """
+        Get list of bank holidays for a given year
+
+        Args:
+            year: Year to calculate holidays for
+
+        Returns:
+            List of datetime objects for bank holidays
+        """
+        holidays = []
+
+        # Fixed date holidays
+        for month, day in self.BANK_HOLIDAYS:
+            holidays.append(datetime(year, month, day))
+
+        # Martin Luther King Jr. Day - 3rd Monday in January
+        jan_1 = datetime(year, 1, 1)
+        first_monday = jan_1 + timedelta(days=(7 - jan_1.weekday()) % 7)
+        mlk_day = first_monday + timedelta(weeks=2)
+        holidays.append(mlk_day)
+
+        # Presidents Day - 3rd Monday in February
+        feb_1 = datetime(year, 2, 1)
+        first_monday = feb_1 + timedelta(days=(7 - feb_1.weekday()) % 7)
+        presidents_day = first_monday + timedelta(weeks=2)
+        holidays.append(presidents_day)
+
+        # Memorial Day - Last Monday in May
+        may_31 = datetime(year, 5, 31)
+        memorial_day = may_31 - timedelta(days=(may_31.weekday() - 0) % 7)
+        holidays.append(memorial_day)
+
+        # Labor Day - 1st Monday in September
+        sep_1 = datetime(year, 9, 1)
+        labor_day = sep_1 + timedelta(days=(7 - sep_1.weekday()) % 7)
+        holidays.append(labor_day)
+
+        # Thanksgiving - 4th Thursday in November
+        nov_1 = datetime(year, 11, 1)
+        first_thursday = nov_1 + timedelta(days=(3 - nov_1.weekday()) % 7)
+        thanksgiving = first_thursday + timedelta(weeks=3)
+        holidays.append(thanksgiving)
+
+        return holidays
+
+    def _count_working_days(self, start_date: datetime, end_date: datetime) -> int:
+        """
+        Count working days between two dates, excluding weekends and bank holidays
+
+        Args:
+            start_date: Start date (inclusive)
+            end_date: End date (inclusive)
+
+        Returns:
+            Number of working days
+        """
+        working_days = 0
+        current_date = start_date
+
+        # Get bank holidays for all years in range
+        years = range(start_date.year, end_date.year + 1)
+        all_holidays = []
+        for year in years:
+            all_holidays.extend(self._get_bank_holidays(year))
+
+        # Convert to date objects for comparison
+        holiday_dates = set(h.date() for h in all_holidays)
+
+        while current_date <= end_date:
+            # Check if it's a weekday (Monday=0, Sunday=6)
+            if current_date.weekday() < 5:  # Monday through Friday
+                # Check if it's not a bank holiday
+                if current_date.date() not in holiday_dates:
+                    working_days += 1
+
+            current_date += timedelta(days=1)
+
+        return working_days
+
+    def get_sales_per_working_day(self) -> Dict:
+        """
+        Calculate sales per working day excluding bank holidays
+
+        Returns:
+            Dictionary with working day metrics
+        """
+        # Try to extract dates from filename
+        dates = self._extract_dates_from_filename(self.current_year_path)
+
+        if not dates:
+            return {
+                'error': 'Could not extract date range from filename',
+                'working_days': None,
+                'sales_per_working_day_cy': None,
+                'sales_per_working_day_py': None
+            }
+
+        start_date, end_date = dates
+        working_days = self._count_working_days(start_date, end_date)
+
+        # Import parser to get sales totals
+        from sales_parser import SalesDashboardParser
+
+        current_parser = SalesDashboardParser(self.current_year_path)
+        current_parser.load_data()
+        summary = current_parser.summary_data
+
+        total_sales_cy = summary.get('total_sales_cy', 0)
+        total_sales_py = summary.get('total_sales_py', 0)
+
+        return {
+            'date_range': {
+                'start_date': start_date.strftime('%Y-%m-%d'),
+                'end_date': end_date.strftime('%Y-%m-%d'),
+                'total_days': (end_date - start_date).days + 1
+            },
+            'working_days': working_days,
+            'weekend_days': sum(1 for d in range((end_date - start_date).days + 1)
+                              if (start_date + timedelta(days=d)).weekday() >= 5),
+            'bank_holidays': (end_date - start_date).days + 1 - working_days -
+                           sum(1 for d in range((end_date - start_date).days + 1)
+                               if (start_date + timedelta(days=d)).weekday() >= 5),
+            'sales_per_working_day_cy': round(total_sales_cy / working_days, 2) if working_days > 0 else 0,
+            'sales_per_working_day_py': round(total_sales_py / working_days, 2) if working_days > 0 else 0,
+            'total_sales_cy': total_sales_cy,
+            'total_sales_py': total_sales_py,
+            'change_per_day': round((total_sales_cy - total_sales_py) / working_days, 2) if working_days > 0 else 0,
+            'pct_change_per_day': round(((total_sales_cy / working_days) / (total_sales_py / working_days) - 1) * 100, 2) if working_days > 0 and total_sales_py > 0 else 0
+        }
+
     def get_complete_comparison_summary(self) -> Dict:
         """
         Generate complete dashboard data including brand-level comparisons
@@ -312,6 +593,12 @@ class SalesComparisonParser:
         for color in set(self.BRAND_COLOR_MAP.values()):
             color_drill_downs[color] = self.get_color_group_drill_down(color)
 
+        # NEW: Add accounts per brand analysis
+        accounts_per_brand = self.get_accounts_per_brand(threshold=12)
+
+        # NEW: Add sales per working day metrics
+        sales_per_working_day = self.get_sales_per_working_day()
+
         # Enhance base summary with comparison data
         base_summary['brand_comparison'] = {
             'all_customer_brand_changes': all_brand_changes,
@@ -323,6 +610,10 @@ class SalesComparisonParser:
                 'total_color_groups': len(set(self.BRAND_COLOR_MAP.values()))
             }
         }
+
+        # Add new features to base summary
+        base_summary['accounts_per_brand'] = accounts_per_brand
+        base_summary['sales_per_working_day'] = sales_per_working_day
 
         return base_summary
 
