@@ -19,6 +19,7 @@ const COLOR_GROUP_COLORS: { [key: string]: string } = {
 export default function AccountsPerBrand({ data }: AccountsPerBrandProps) {
   const [showYear, setShowYear] = useState<'current' | 'previous'>('current');
   const [expandedBrand, setExpandedBrand] = useState<string | null>(null);
+  const [showingChangeDetails, setShowingChangeDetails] = useState<string | null>(null);
 
   if (!data) return null;
 
@@ -29,6 +30,32 @@ export default function AccountsPerBrand({ data }: AccountsPerBrandProps) {
     const change = cyValue - pyValue;
     const pctChange = pyValue > 0 ? ((change / pyValue) * 100).toFixed(1) : 0;
     return { change, pctChange };
+  };
+
+  const getAccountChanges = (brand: string) => {
+    const cyBrand = data.current_year.find((b) => b.brand === brand);
+    const pyBrand = data.previous_year.find((b) => b.brand === brand);
+
+    if (!cyBrand || !pyBrand) return { gained: [], lost: [] };
+
+    const cyAccountNumbers = new Set(
+      cyBrand.qualifying_accounts.map((a) => a.account_number)
+    );
+    const pyAccountNumbers = new Set(
+      pyBrand.qualifying_accounts.map((a) => a.account_number)
+    );
+
+    // Lost accounts: in PY but not in CY
+    const lost = pyBrand.qualifying_accounts.filter(
+      (account) => !cyAccountNumbers.has(account.account_number)
+    );
+
+    // Gained accounts: in CY but not in PY
+    const gained = cyBrand.qualifying_accounts.filter(
+      (account) => !pyAccountNumbers.has(account.account_number)
+    );
+
+    return { gained, lost };
   };
 
   return (
@@ -115,6 +142,8 @@ export default function AccountsPerBrand({ data }: AccountsPerBrandProps) {
           const { change, pctChange } = calculateChange(cyAccounts, pyAccounts);
 
           const isExpanded = expandedBrand === brandMetric.brand;
+          const isShowingChanges = showingChangeDetails === brandMetric.brand;
+          const { gained, lost } = getAccountChanges(brandMetric.brand);
 
           return (
             <div
@@ -156,12 +185,19 @@ export default function AccountsPerBrand({ data }: AccountsPerBrandProps) {
                     </div>
 
                     {change !== 0 && (
-                      <div
-                        className={`flex items-center gap-1 px-3 py-1 rounded-full ${
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowingChangeDetails(
+                            isShowingChanges ? null : brandMetric.brand
+                          );
+                        }}
+                        className={`flex items-center gap-1 px-3 py-1 rounded-full transition-all hover:shadow-md ${
                           change > 0
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                            : 'bg-red-100 text-red-700 hover:bg-red-200'
+                        } ${isShowingChanges ? 'ring-2 ring-offset-1 ring-blue-400' : ''}`}
+                        title="Click to see which accounts were gained or lost"
                       >
                         {change > 0 ? (
                           <TrendingUp className="w-4 h-4" />
@@ -172,7 +208,7 @@ export default function AccountsPerBrand({ data }: AccountsPerBrandProps) {
                           {change > 0 ? '+' : ''}
                           {change} ({pctChange}%)
                         </span>
-                      </div>
+                      </button>
                     )}
 
                     <span className="text-gray-400 text-xl">
@@ -193,6 +229,69 @@ export default function AccountsPerBrand({ data }: AccountsPerBrandProps) {
                   </span>
                 </div>
               </div>
+
+              {/* Account Change Details */}
+              {isShowingChanges && (gained.length > 0 || lost.length > 0) && (
+                <div className="border-t border-gray-200 bg-blue-50 p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Lost Accounts */}
+                    {lost.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-red-700 mb-3 flex items-center gap-2">
+                          <TrendingDown className="w-5 h-5" />
+                          Lost Accounts ({lost.length})
+                        </h4>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {lost.map((account) => (
+                            <div
+                              key={account.account_number}
+                              className="bg-white rounded border border-red-200 p-2"
+                            >
+                              <p className="font-medium text-gray-800 text-sm truncate">
+                                {account.account_name}
+                              </p>
+                              <p className="text-xs text-gray-600">
+                                Acct #{account.account_number}
+                              </p>
+                              <p className="text-sm font-semibold text-red-600 mt-1">
+                                {account.units} units (PY)
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Gained Accounts */}
+                    {gained.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-green-700 mb-3 flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5" />
+                          Gained Accounts ({gained.length})
+                        </h4>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {gained.map((account) => (
+                            <div
+                              key={account.account_number}
+                              className="bg-white rounded border border-green-200 p-2"
+                            >
+                              <p className="font-medium text-gray-800 text-sm truncate">
+                                {account.account_name}
+                              </p>
+                              <p className="text-xs text-gray-600">
+                                Acct #{account.account_number}
+                              </p>
+                              <p className="text-sm font-semibold text-green-600 mt-1">
+                                {account.units} units (CY)
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Expanded Qualifying Accounts */}
               {isExpanded && brandMetric.qualifying_accounts.length > 0 && (
