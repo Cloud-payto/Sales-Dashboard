@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Users, TrendingUp, TrendingDown, Package } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Users, TrendingUp, TrendingDown, Package, Filter } from 'lucide-react';
 import { AccountsPerBrand as AccountsPerBrandType } from '../types';
 
 interface AccountsPerBrandProps {
@@ -16,15 +16,32 @@ const COLOR_GROUP_COLORS: { [key: string]: string } = {
   'OTHER': 'bg-gray-400 text-gray-900',
 };
 
+const COLOR_GROUP_ORDER = ['BLACK DIAMOND', 'YELLOW', 'RED', 'BLUE', 'GREEN', 'LIME', 'OTHER'];
+
 export default function AccountsPerBrand({ data }: AccountsPerBrandProps) {
   const [showYear, setShowYear] = useState<'current' | 'previous'>('current');
   const [expandedBrand, setExpandedBrand] = useState<string | null>(null);
   const [showingChangeDetails, setShowingChangeDetails] = useState<string | null>(null);
+  const [selectedColorGroup, setSelectedColorGroup] = useState<string | null>(null);
 
   if (!data) return null;
 
-  const displayData = showYear === 'current' ? data.current_year : data.previous_year;
+  const baseDisplayData = showYear === 'current' ? data.current_year : data.previous_year;
   const { summary } = data;
+
+  // Get unique color groups from data and sort by predefined order
+  const availableColorGroups = useMemo(() => {
+    const groups = new Set<string>();
+    data.current_year.forEach((b) => groups.add(b.color_group));
+    data.previous_year.forEach((b) => groups.add(b.color_group));
+    return COLOR_GROUP_ORDER.filter((g) => groups.has(g));
+  }, [data]);
+
+  // Filter data by selected color group
+  const displayData = useMemo(() => {
+    if (!selectedColorGroup) return baseDisplayData;
+    return baseDisplayData.filter((b) => b.color_group === selectedColorGroup);
+  }, [baseDisplayData, selectedColorGroup]);
 
   const calculateChange = (cyValue: number, pyValue: number) => {
     const change = cyValue - pyValue;
@@ -92,6 +109,39 @@ export default function AccountsPerBrand({ data }: AccountsPerBrandProps) {
           >
             Previous Year
           </button>
+        </div>
+      </div>
+
+      {/* Color Group Filter */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Filter className="w-4 h-4 text-gray-500" />
+          <span className="text-sm text-gray-600 mr-1">Color Group:</span>
+          <button
+            onClick={() => setSelectedColorGroup(null)}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              selectedColorGroup === null
+                ? 'bg-blue-600 text-white ring-2 ring-blue-300'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            All
+          </button>
+          {availableColorGroups.map((group) => (
+            <button
+              key={group}
+              onClick={() => setSelectedColorGroup(selectedColorGroup === group ? null : group)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                COLOR_GROUP_COLORS[group] || COLOR_GROUP_COLORS.OTHER
+              } ${
+                selectedColorGroup === group
+                  ? 'ring-2 ring-offset-1 ring-blue-400 scale-105'
+                  : 'opacity-70 hover:opacity-100'
+              }`}
+            >
+              {group}
+            </button>
+          ))}
         </div>
       </div>
 
