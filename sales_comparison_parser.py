@@ -10,6 +10,7 @@ import json
 from datetime import datetime, timedelta
 import re
 import os
+import openpyxl
 
 
 class SalesComparisonParser:
@@ -440,7 +441,6 @@ class SalesComparisonParser:
 
         # If not found in filename, try reading from Excel cell C1
         try:
-            import openpyxl
             wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
             sheet = wb.active
 
