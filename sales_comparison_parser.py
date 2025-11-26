@@ -405,6 +405,7 @@ class SalesComparisonParser:
     def _extract_dates_from_filename(self, file_path: str) -> Optional[Tuple[datetime, datetime]]:
         """
         Extract start and end dates from filename pattern like 'Payton YOY 8-18-24 to 8-19-25.xlsx'
+        or from Excel cell C1 if filename doesn't contain dates
 
         Args:
             file_path: Path to the Excel file
@@ -436,6 +437,40 @@ class SalesComparisonParser:
                 return (start_date, end_date)
             except ValueError:
                 return None
+
+        # If not found in filename, try reading from Excel cell C1
+        try:
+            import openpyxl
+            wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
+            sheet = wb.active
+
+            # Try cell C1 (row 1, column 3)
+            cell_value = sheet['C1'].value
+            wb.close()
+
+            if cell_value and isinstance(cell_value, str):
+                # Try to find date pattern in cell value
+                match = re.search(pattern, cell_value)
+                if match:
+                    start_month, start_day, start_year, end_month, end_day, end_year = match.groups()
+
+                    # Convert 2-digit years to 4-digit
+                    start_year = int(start_year)
+                    if start_year < 100:
+                        start_year += 2000
+
+                    end_year = int(end_year)
+                    if end_year < 100:
+                        end_year += 2000
+
+                    try:
+                        start_date = datetime(start_year, int(start_month), int(start_day))
+                        end_date = datetime(end_year, int(end_month), int(end_day))
+                        return (start_date, end_date)
+                    except ValueError:
+                        pass
+        except Exception as e:
+            print(f"[WARNING] Could not read date from Excel cell C1: {e}")
 
         return None
 
