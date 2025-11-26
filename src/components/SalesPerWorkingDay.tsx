@@ -18,7 +18,9 @@ export default function SalesPerWorkingDay({ data }: SalesPerWorkingDayProps) {
           <Calendar className="w-16 h-16 mx-auto mb-4 opacity-30" />
           <p>{data?.error || 'Working day data not available'}</p>
           <p className="text-sm mt-2">
-            Date range must be in filename format: "MM-DD-YY to MM-DD-YY"
+            Date range must be in filename (e.g., "PAM 11-20-24 to 11-19-25.xlsx")
+            <br />
+            or in Excel cell C1 (e.g., "Date Range: 11/20/24..11/19/25")
           </p>
         </div>
       </div>

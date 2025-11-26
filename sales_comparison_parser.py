@@ -408,6 +408,10 @@ class SalesComparisonParser:
         Extract start and end dates from filename pattern like 'Payton YOY 8-18-24 to 8-19-25.xlsx'
         or from Excel cell C1 if filename doesn't contain dates
 
+        Supported formats:
+        - Filename: "MM-DD-YY to MM-DD-YY" (e.g., "PAM 11-20-24 to 11-19-25.xlsx")
+        - Cell C1: "Date Range: MM/DD/YY..MM/DD/YY" (e.g., "Date Range: 11/20/24..11/19/25")
+
         Args:
             file_path: Path to the Excel file
 
@@ -416,11 +420,24 @@ class SalesComparisonParser:
         """
         filename = os.path.basename(file_path)
 
-        # Pattern: Month-Day-Year to Month-Day-Year
-        pattern = r'(\d{1,2})-(\d{1,2})-(\d{2,4})\s+to\s+(\d{1,2})-(\d{1,2})-(\d{2,4})'
-        match = re.search(pattern, filename)
+        # Pattern 1: Month-Day-Year to Month-Day-Year (dashes with "to")
+        pattern_dashes_to = r'(\d{1,2})-(\d{1,2})-(\d{2,4})\s+to\s+(\d{1,2})-(\d{1,2})-(\d{2,4})'
 
-        if match:
+        # Pattern 2: Month/Day/Year..Month/Day/Year (slashes with "..")
+        pattern_slashes_dots = r'(\d{1,2})/(\d{1,2})/(\d{2,4})\.\.(\d{1,2})/(\d{1,2})/(\d{2,4})'
+
+        # Pattern 3: Month/Day/Year to Month/Day/Year (slashes with "to")
+        pattern_slashes_to = r'(\d{1,2})/(\d{1,2})/(\d{2,4})\s+to\s+(\d{1,2})/(\d{1,2})/(\d{2,4})'
+
+        # Pattern 4: Month-Day-Year..Month-Day-Year (dashes with "..")
+        pattern_dashes_dots = r'(\d{1,2})-(\d{1,2})-(\d{2,4})\.\.(\d{1,2})-(\d{1,2})-(\d{2,4})'
+
+        patterns = [pattern_dashes_to, pattern_slashes_dots, pattern_slashes_to, pattern_dashes_dots]
+
+        def try_parse_match(match) -> Optional[Tuple[datetime, datetime]]:
+            """Helper to parse a regex match into datetime tuple"""
+            if not match:
+                return None
             start_month, start_day, start_year, end_month, end_day, end_year = match.groups()
 
             # Convert 2-digit years to 4-digit
@@ -439,6 +456,13 @@ class SalesComparisonParser:
             except ValueError:
                 return None
 
+        # Try all patterns on filename
+        for pattern in patterns:
+            match = re.search(pattern, filename)
+            result = try_parse_match(match)
+            if result:
+                return result
+
         # If not found in filename, try reading from Excel cell C1
         try:
             wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
@@ -449,26 +473,12 @@ class SalesComparisonParser:
             wb.close()
 
             if cell_value and isinstance(cell_value, str):
-                # Try to find date pattern in cell value
-                match = re.search(pattern, cell_value)
-                if match:
-                    start_month, start_day, start_year, end_month, end_day, end_year = match.groups()
-
-                    # Convert 2-digit years to 4-digit
-                    start_year = int(start_year)
-                    if start_year < 100:
-                        start_year += 2000
-
-                    end_year = int(end_year)
-                    if end_year < 100:
-                        end_year += 2000
-
-                    try:
-                        start_date = datetime(start_year, int(start_month), int(start_day))
-                        end_date = datetime(end_year, int(end_month), int(end_day))
-                        return (start_date, end_date)
-                    except ValueError:
-                        pass
+                # Try all patterns on cell value
+                for pattern in patterns:
+                    match = re.search(pattern, cell_value)
+                    result = try_parse_match(match)
+                    if result:
+                        return result
         except Exception as e:
             print(f"[WARNING] Could not read date from Excel cell C1: {e}")
 
