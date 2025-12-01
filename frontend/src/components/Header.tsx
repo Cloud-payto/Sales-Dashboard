@@ -178,6 +178,18 @@ const Header: React.FC = () => {
             )}
 
             <Link
+              to="/territory-map"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                isActive('/territory-map')
+                  ? 'bg-blue-50 text-blue-700 font-medium'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <MapIcon className="w-4 h-4" />
+              Territory Map
+            </Link>
+
+            <Link
               to="/upload"
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 isActive('/upload')
