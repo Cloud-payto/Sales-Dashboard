@@ -6,11 +6,12 @@ import {
   PlaceStatus,
   PlaceRouteWaypoint,
   Route,
+  Zone,
 } from '../types/territory';
-import { TERRITORIES } from '../constants/territories';
+import { TERRITORIES, DEFAULT_ZONES, UNASSIGNED_COLOR, ZONE_COLOR_PALETTE } from '../constants/territories';
 import { parseCSV, getCachedPlaces, cachePlaces } from '../utils/csvLoader';
 
-// Place status colors
+// Place status colors (kept for reference but zones take priority)
 const PLACE_STATUS_COLORS: Record<PlaceStatus, string> = {
   active: '#10b981',      // Green
   cold_call: '#3b82f6',   // Blue
@@ -24,6 +25,15 @@ interface PlaceTerritoryContextType {
   selectedTerritory: Territory | null;
   setSelectedTerritory: (territory: Territory | null) => void;
 
+  // Zones
+  zones: Zone[];
+  addZone: (name: string) => Zone;
+  updateZone: (zoneId: string, updates: Partial<Zone>) => void;
+  deleteZone: (zoneId: string) => void;
+  getZoneColor: (zoneId: string | undefined) => string;
+  colorByZone: boolean;
+  setColorByZone: (value: boolean) => void;
+
   // Places from CSV
   places: Place[];
   isLoading: boolean;
@@ -34,6 +44,9 @@ interface PlaceTerritoryContextType {
   // Place management
   updatePlaceStatus: (placeId: string, status: PlaceStatus) => void;
   updatePlaceNotes: (placeId: string, notes: string) => void;
+  assignPlaceToZone: (placeId: string, zoneId: string | undefined) => void;
+  assignPlacesToZone: (placeIds: string[], zoneId: string | undefined) => void;
+  unassignedPlaces: Place[];
 
   // Map State
   selectedMarkers: PlaceMarker[];
@@ -64,6 +77,7 @@ const TerritoryContext = createContext<PlaceTerritoryContextType | undefined>(un
 
 const ROUTES_STORAGE_KEY = 'sales_dashboard_routes';
 const PLACES_STORAGE_KEY = 'places_data';
+const ZONES_STORAGE_KEY = 'sales_dashboard_zones';
 
 interface TerritoryProviderProps {
   children: ReactNode;
@@ -72,6 +86,20 @@ interface TerritoryProviderProps {
 export const TerritoryProvider: React.FC<TerritoryProviderProps> = ({ children }) => {
   const [territories] = useState<Territory[]>(TERRITORIES);
   const [selectedTerritory, setSelectedTerritory] = useState<Territory | null>(null);
+
+  // Zones state
+  const [zones, setZones] = useState<Zone[]>(() => {
+    const stored = localStorage.getItem(ZONES_STORAGE_KEY);
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch {
+        return DEFAULT_ZONES;
+      }
+    }
+    return DEFAULT_ZONES;
+  });
+  const [colorByZone, setColorByZone] = useState(true);
 
   // Places state
   const [places, setPlaces] = useState<Place[]>([]);
@@ -189,6 +217,85 @@ export const TerritoryProvider: React.FC<TerritoryProviderProps> = ({ children }
       return updated;
     });
   }, []);
+
+  // Zone management functions
+  const addZone = useCallback((name: string): Zone => {
+    const usedColors = zones.map(z => z.color);
+    const availableColor = ZONE_COLOR_PALETTE.find(c => !usedColors.includes(c)) || ZONE_COLOR_PALETTE[0];
+
+    const newZone: Zone = {
+      id: `zone_${Date.now()}`,
+      name,
+      color: availableColor,
+    };
+
+    setZones(prev => {
+      const updated = [...prev, newZone];
+      localStorage.setItem(ZONES_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+
+    return newZone;
+  }, [zones]);
+
+  const updateZone = useCallback((zoneId: string, updates: Partial<Zone>) => {
+    setZones(prev => {
+      const updated = prev.map(z =>
+        z.id === zoneId ? { ...z, ...updates } : z
+      );
+      localStorage.setItem(ZONES_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const deleteZone = useCallback((zoneId: string) => {
+    // Remove zone and unassign all places from it
+    setZones(prev => {
+      const updated = prev.filter(z => z.id !== zoneId);
+      localStorage.setItem(ZONES_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+
+    // Unassign places that were in this zone
+    setPlaces(prev => {
+      const updated = prev.map(p =>
+        p.zoneId === zoneId ? { ...p, zoneId: undefined } : p
+      );
+      cachePlaces(updated);
+      return updated;
+    });
+  }, []);
+
+  const getZoneColor = useCallback((zoneId: string | undefined): string => {
+    if (!zoneId) return UNASSIGNED_COLOR;
+    const zone = zones.find(z => z.id === zoneId);
+    return zone?.color || UNASSIGNED_COLOR;
+  }, [zones]);
+
+  // Assign a place to a zone
+  const assignPlaceToZone = useCallback((placeId: string, zoneId: string | undefined) => {
+    setPlaces(prev => {
+      const updated = prev.map(p =>
+        p.id === placeId ? { ...p, zoneId } : p
+      );
+      cachePlaces(updated);
+      return updated;
+    });
+  }, []);
+
+  // Bulk assign places to a zone
+  const assignPlacesToZone = useCallback((placeIds: string[], zoneId: string | undefined) => {
+    setPlaces(prev => {
+      const updated = prev.map(p =>
+        placeIds.includes(p.id) ? { ...p, zoneId } : p
+      );
+      cachePlaces(updated);
+      return updated;
+    });
+  }, []);
+
+  // Get unassigned places
+  const unassignedPlaces = places.filter(p => !p.zoneId);
 
   // Toggle marker selection
   const toggleMarkerSelection = useCallback((marker: PlaceMarker) => {
@@ -346,7 +453,7 @@ export const TerritoryProvider: React.FC<TerritoryProviderProps> = ({ children }
       }
     }
 
-    // Convert to markers
+    // Convert to markers - use zone color if colorByZone is enabled
     const markers: PlaceMarker[] = filtered.map(place => ({
       id: place.id,
       position: {
@@ -354,12 +461,12 @@ export const TerritoryProvider: React.FC<TerritoryProviderProps> = ({ children }
         longitude: place.longitude,
       },
       place,
-      color: PLACE_STATUS_COLORS[place.status],
+      color: colorByZone ? getZoneColor(place.zoneId) : PLACE_STATUS_COLORS[place.status],
       isSelected: selectedMarkers.some(m => m.id === place.id),
     }));
 
     setVisibleMarkers(markers);
-  }, [places, searchQuery, statusFilter, territoryFilter, territories, selectedMarkers]);
+  }, [places, searchQuery, statusFilter, territoryFilter, territories, selectedMarkers, colorByZone, getZoneColor]);
 
   // Load places on mount
   useEffect(() => {
@@ -370,6 +477,15 @@ export const TerritoryProvider: React.FC<TerritoryProviderProps> = ({ children }
     territories,
     selectedTerritory,
     setSelectedTerritory,
+    // Zones
+    zones,
+    addZone,
+    updateZone,
+    deleteZone,
+    getZoneColor,
+    colorByZone,
+    setColorByZone,
+    // Places
     places,
     isLoading,
     loadError,
@@ -377,6 +493,10 @@ export const TerritoryProvider: React.FC<TerritoryProviderProps> = ({ children }
     reloadPlaces,
     updatePlaceStatus,
     updatePlaceNotes,
+    assignPlaceToZone,
+    assignPlacesToZone,
+    unassignedPlaces,
+    // Map state
     selectedMarkers,
     hoveredMarker,
     toggleMarkerSelection,

@@ -3,8 +3,10 @@ import { useTerritory } from '../contexts/TerritoryContext';
 import TerritoryMap from '../components/map/TerritoryMap';
 import MapControls from '../components/map/MapControls';
 import RoutePanel from '../components/map/RoutePanel';
+import ZoneEditorPanel from '../components/map/ZoneEditorPanel';
+import ZoneLegend from '../components/map/ZoneLegend';
 import { PlaceMarker, PlaceStatus } from '../types/territory';
-import { Loader2, AlertCircle, MapPin, Upload, RefreshCw, Search, X } from 'lucide-react';
+import { Loader2, AlertCircle, MapPin, Upload, RefreshCw, Search, X, AlertTriangle } from 'lucide-react';
 
 const TerritoryMapPage: React.FC = () => {
   const {
@@ -21,6 +23,7 @@ const TerritoryMapPage: React.FC = () => {
     statusFilter,
     setStatusFilter,
     visibleMarkers,
+    unassignedPlaces,
   } = useTerritory();
 
   const [showRoutePanel, setShowRoutePanel] = useState(false);
@@ -235,6 +238,12 @@ const TerritoryMapPage: React.FC = () => {
       {/* Map Controls */}
       <MapControls onPlanRoute={handlePlanRoute} />
 
+      {/* Zone Editor Panel - Left Side */}
+      <div className="absolute top-24 left-4 z-20 w-72 space-y-4">
+        <ZoneEditorPanel />
+        <ZoneLegend />
+      </div>
+
       {/* Route Panel */}
       {showRoutePanel && currentRoute && (
         <RoutePanel route={currentRoute} onClose={() => setShowRoutePanel(false)} />
@@ -248,6 +257,15 @@ const TerritoryMapPage: React.FC = () => {
             {visibleMarkers.length} of {places.length} Places
           </span>
         </div>
+        {unassignedPlaces.length > 0 && (
+          <>
+            <div className="w-px h-4 bg-gray-300" />
+            <div className="flex items-center gap-1.5 text-amber-600">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>{unassignedPlaces.length} unassigned</span>
+            </div>
+          </>
+        )}
         {selectedMarkers.length > 0 && (
           <>
             <div className="w-px h-4 bg-gray-300" />

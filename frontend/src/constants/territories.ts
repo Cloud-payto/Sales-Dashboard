@@ -1,5 +1,5 @@
 // Territory Definitions for Phoenix Metro Area
-import { Territory } from '../types/territory';
+import { Territory, Zone } from '../types/territory';
 
 export const PHOENIX_METRO_CENTER = {
   latitude: 33.4484,
@@ -138,3 +138,34 @@ export const PHOENIX_METRO_BOUNDS = {
   east: -111.5,
   west: -112.5,
 };
+
+// Default Zones with distinct colors
+export const DEFAULT_ZONES: Zone[] = [
+  { id: 'zone_1', name: 'Zone 1', color: '#3b82f6', description: 'Primary zone' },  // Blue
+  { id: 'zone_2', name: 'Zone 2', color: '#10b981', description: 'Secondary zone' },  // Green
+  { id: 'zone_3', name: 'Zone 3', color: '#f59e0b', description: 'Tertiary zone' },  // Amber
+  { id: 'zone_4', name: 'Zone 4', color: '#ef4444', description: 'Fourth zone' },  // Red
+  { id: 'zone_5', name: 'Zone 5', color: '#8b5cf6', description: 'Fifth zone' },  // Purple
+  { id: 'zone_6', name: 'Zone 6', color: '#ec4899', description: 'Sixth zone' },  // Pink
+  { id: 'zone_7', name: 'Zone 7', color: '#06b6d4', description: 'Seventh zone' },  // Cyan
+  { id: 'zone_8', name: 'Zone 8', color: '#84cc16', description: 'Eighth zone' },  // Lime
+];
+
+// Color for unassigned places
+export const UNASSIGNED_COLOR = '#9ca3af';  // Gray
+
+// Zone color palette for new zones
+export const ZONE_COLOR_PALETTE = [
+  '#3b82f6', // Blue
+  '#10b981', // Green
+  '#f59e0b', // Amber
+  '#ef4444', // Red
+  '#8b5cf6', // Purple
+  '#ec4899', // Pink
+  '#06b6d4', // Cyan
+  '#84cc16', // Lime
+  '#f97316', // Orange
+  '#14b8a6', // Teal
+  '#a855f7', // Violet
+  '#f43f5e', // Rose
+];

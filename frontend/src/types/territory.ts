@@ -15,11 +15,22 @@ export interface Place {
   longitude: number;
   originalUrl?: string;
   status: PlaceStatus;
+  // Zone assignment
+  zoneId?: string;  // ID of assigned zone (undefined = unassigned)
   // Optional fields for user customization
   notes?: string;
   lastVisit?: string;
   nextVisit?: string;
   category?: string;
+}
+
+// Zone definition for territory management
+export interface Zone {
+  id: string;
+  name: string;
+  color: string;
+  territoryId?: string;  // Optional parent territory
+  description?: string;
 }
 
 export type PlaceStatus = 'active' | 'cold_call' | 'prospect' | 'inactive';
