@@ -133,9 +133,18 @@ class handler(BaseHTTPRequestHandler):
                 current_year_temp = temp_file.name
 
             # Parse BOTH Excel files with comparison parser
+            import time
+            start_time = time.time()
+            print(f"[TIMING] Starting parser at {start_time}")
+
             parser = SalesComparisonParser(previous_year_temp, current_year_temp)
+            print(f"[TIMING] Parser created: {time.time() - start_time:.2f}s")
+
             parser.load_data()
+            print(f"[TIMING] Data loaded: {time.time() - start_time:.2f}s")
+
             dashboard_data = parser.get_complete_comparison_summary()
+            print(f"[TIMING] Summary complete: {time.time() - start_time:.2f}s")
 
             # Clean NaN values from the data
             dashboard_data = clean_nan_values(dashboard_data)
