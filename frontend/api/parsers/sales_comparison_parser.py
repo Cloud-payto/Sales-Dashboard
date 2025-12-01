@@ -586,7 +586,7 @@ class SalesComparisonParser:
         working_days = self._count_working_days(start_date, end_date)
 
         # Import parser to get sales totals
-        from sales_parser import SalesDashboardParser
+        from .sales_parser import SalesDashboardParser
 
         current_parser = SalesDashboardParser(self.current_year_path)
         current_parser.load_data()
@@ -623,7 +623,7 @@ class SalesComparisonParser:
             Complete dashboard data structure
         """
         # Import the original parser for aggregate metrics
-        from sales_parser import SalesDashboardParser
+        from .sales_parser import SalesDashboardParser
 
         # Parse current year file for aggregate metrics (maintains compatibility)
         current_parser = SalesDashboardParser(self.current_year_path)
