@@ -11,7 +11,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 try:
-    from sales_comparison_parser import SalesComparisonParser
+    from parsers.sales_comparison_parser import SalesComparisonParser
     import pandas as pd
 except ImportError:
     # Fallback if parser not available

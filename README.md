@@ -50,12 +50,14 @@ A comprehensive Year-over-Year (YOY) sales analytics dashboard for sales represe
 ### Installation
 
 ```bash
+cd frontend
 npm install
 ```
 
 ### Development
 
 ```bash
+cd frontend
 npm run dev
 ```
 
@@ -64,33 +66,52 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ### Build
 
 ```bash
+cd frontend
 npm run build
 ```
 
-### Preview Production Build
+### Backend Setup
 
 ```bash
-npm run preview
+cd backend
+pip install -r requirements.txt
+python api_server.py
 ```
 
 ## Project Structure
 
 ```
-src/
-├── components/
-│   ├── Sidebar.tsx              # Navigation sidebar
-│   ├── MetricCard.tsx           # Metric display cards with trend indicators
-│   ├── TrafficChart.tsx         # Frame category performance chart
-│   ├── AccountsTable.tsx        # Sortable accounts table
-│   ├── BrandPerformance.tsx     # Brand analytics component
-│   └── InsightsPanel.tsx        # Key insights and alerts
-├── data/
-│   └── mockData.ts              # Sample data for development
-├── types/
-│   └── index.ts                 # TypeScript type definitions
-├── App.tsx                      # Main application component
-├── main.tsx                     # Application entry point
-└── index.css                    # Global styles and Tailwind imports
+sales_dashboard/
+├── frontend/                    # React/TypeScript application
+│   ├── src/
+│   │   ├── components/          # UI components
+│   │   ├── pages/               # Page components
+│   │   ├── contexts/            # React contexts
+│   │   ├── hooks/               # Custom hooks
+│   │   ├── constants/           # Configuration constants
+│   │   └── types/               # TypeScript definitions
+│   ├── package.json
+│   └── vite.config.ts
+│
+├── backend/                     # Python Flask API
+│   ├── api/                     # API endpoints
+│   ├── parsers/                 # Excel parsing logic
+│   ├── output/                  # Generated outputs
+│   ├── api_server.py
+│   └── requirements.txt
+│
+├── google/                      # Google API integrations
+│   ├── extract_place_details.py
+│   └── api-key.txt
+│
+├── documents/                   # Documentation
+│   └── ORGANIZATION.md          # Codebase organization guide
+│
+├── data/                        # Data files
+│   ├── input/                   # Source Excel files
+│   └── output/                  # Generated data files
+│
+└── README.md
 ```
 
 ## Data Integration
@@ -101,23 +122,24 @@ The dashboard is designed to work with data from the Python sales parser. To use
 
 1. Run the Python parser on your Excel sales report:
    ```bash
-   python sales_parser.py
+   cd backend
+   python -c "from parsers.sales_parser import SalesDashboardParser; p = SalesDashboardParser('../data/input/your_file.xlsx'); p.load_data(); p.save_dashboard_data()"
    ```
 
-2. This generates `sales_dashboard_data.json`
+2. This generates `data/output/sales_dashboard_data.json`
 
-3. Replace the mock data import in [src/App.tsx](src/App.tsx):
+3. Replace the mock data import in [frontend/src/App.tsx](frontend/src/App.tsx):
    ```typescript
    // Replace this:
    import { mockDashboardData } from './data/mockData';
 
    // With this:
-   import dashboardData from './sales_dashboard_data.json';
+   import dashboardData from '../../data/output/sales_dashboard_data.json';
    ```
 
 ### Data Structure
 
-The dashboard expects data in the following format (see [PARSER_README.md](PARSER_README.md) for details):
+The dashboard expects data in the following format (see [documents/PARSER_README.md](documents/PARSER_README.md) for details):
 
 ```typescript
 {
@@ -149,7 +171,7 @@ The dashboard expects data in the following format (see [PARSER_README.md](PARSE
 
 ### Adjusting Displayed Data
 
-Edit [src/App.tsx](src/App.tsx) to customize:
+Edit [frontend/src/App.tsx](frontend/src/App.tsx) to customize:
 - Number of accounts shown in tables
 - Number of brands displayed
 - Chart configurations
@@ -165,9 +187,9 @@ Tailwind CSS classes can be modified in any component file. The theme uses:
 
 ### Adding New Components
 
-1. Create new component in `src/components/`
-2. Import and use in [src/App.tsx](src/App.tsx)
-3. Add TypeScript types to [src/types/index.ts](src/types/index.ts)
+1. Create new component in `frontend/src/components/`
+2. Import and use in [frontend/src/App.tsx](frontend/src/App.tsx)
+3. Add TypeScript types to [frontend/src/types/index.ts](frontend/src/types/index.ts)
 
 ## Key Components
 
@@ -220,8 +242,9 @@ Alert panel with color-coded insights.
 
 ## Related Files
 
-- [PARSER_README.md](PARSER_README.md) - Python parser documentation
-- [sales_parser.py](sales_parser.py) - Data extraction script (if included)
+- [documents/PARSER_README.md](documents/PARSER_README.md) - Python parser documentation
+- [backend/parsers/sales_parser.py](backend/parsers/sales_parser.py) - Data extraction script
+- [documents/ORGANIZATION.md](documents/ORGANIZATION.md) - Codebase organization guide
 
 ## License
 

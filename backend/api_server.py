@@ -10,15 +10,15 @@ from flask_cors import CORS
 import os
 import json
 from datetime import datetime
-from sales_parser import SalesDashboardParser
+from parsers.sales_parser import SalesDashboardParser
 import traceback
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Configuration
-EXCEL_FILE_PATH = 'Payton YOY 8-18-24 to 8-19-25.xlsx'
-OUTPUT_DIR = 'api_output'
+EXCEL_FILE_PATH = '../data/input/Payton YOY 8-18-24 to 8-19-25.xlsx'
+OUTPUT_DIR = 'output'
 
 # Create output directory if it doesn't exist
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -330,7 +330,7 @@ def get_insights():
 @app.route('/files/declining-accounts', methods=['GET'])
 def download_declining_accounts():
     """Download declining accounts CSV"""
-    csv_file = 'declining_accounts.csv'
+    csv_file = '../data/output/declining_accounts.csv'
     if not os.path.exists(csv_file):
         return jsonify({
             'error': 'File not found. Please run POST /parse-excel first.'
@@ -342,7 +342,7 @@ def download_declining_accounts():
 @app.route('/files/increasing-accounts', methods=['GET'])
 def download_increasing_accounts():
     """Download increasing accounts CSV"""
-    csv_file = 'increasing_accounts.csv'
+    csv_file = '../data/output/increasing_accounts.csv'
     if not os.path.exists(csv_file):
         return jsonify({
             'error': 'File not found. Please run POST /parse-excel first.'
@@ -354,7 +354,7 @@ def download_increasing_accounts():
 @app.route('/files/new-accounts', methods=['GET'])
 def download_new_accounts():
     """Download new accounts CSV"""
-    csv_file = 'new_accounts.csv'
+    csv_file = '../data/output/new_accounts.csv'
     if not os.path.exists(csv_file):
         return jsonify({
             'error': 'File not found. Please run POST /parse-excel first.'
@@ -366,7 +366,7 @@ def download_new_accounts():
 @app.route('/files/brand-performance', methods=['GET'])
 def download_brand_performance():
     """Download brand performance JSON"""
-    json_file = 'brand_performance.json'
+    json_file = '../data/output/brand_performance.json'
     if not os.path.exists(json_file):
         return jsonify({
             'error': 'File not found. Please run POST /parse-excel first.'

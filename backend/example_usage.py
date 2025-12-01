@@ -4,14 +4,14 @@ Example usage scripts for the Sales Dashboard Parser
 This file demonstrates various ways to use the parser for specific analysis tasks
 """
 
-from sales_parser import SalesDashboardParser
+from parsers.sales_parser import SalesDashboardParser
 
 
 def example_1_quick_summary():
     """Quick summary report - most common use case"""
     print("\n=== EXAMPLE 1: Quick Summary Report ===\n")
 
-    parser = SalesDashboardParser('Payton YOY 8-18-24 to 8-19-25.xlsx')
+    parser = SalesDashboardParser('../data/input/Payton YOY 8-18-24 to 8-19-25.xlsx')
     parser.load_data()
     parser.print_summary_report()
 
@@ -20,7 +20,7 @@ def example_2_top_declining_accounts():
     """Focus on top declining accounts that need attention"""
     print("\n=== EXAMPLE 2: Top 10 Declining Accounts ===\n")
 
-    parser = SalesDashboardParser('Payton YOY 8-18-24 to 8-19-25.xlsx')
+    parser = SalesDashboardParser('../data/input/Payton YOY 8-18-24 to 8-19-25.xlsx')
     parser.load_data()
 
     # Get top 10 declining accounts
@@ -39,7 +39,7 @@ def example_3_major_declines():
     """Find accounts with significant declines (> $2000)"""
     print("\n=== EXAMPLE 3: Major Declines (>$2000) ===\n")
 
-    parser = SalesDashboardParser('Payton YOY 8-18-24 to 8-19-25.xlsx')
+    parser = SalesDashboardParser('../data/input/Payton YOY 8-18-24 to 8-19-25.xlsx')
     parser.load_data()
 
     # Get accounts declining by more than $2000
@@ -57,7 +57,7 @@ def example_4_growth_opportunities():
     """Identify top growing accounts to understand what's working"""
     print("\n=== EXAMPLE 4: Growth Success Stories ===\n")
 
-    parser = SalesDashboardParser('Payton YOY 8-18-24 to 8-19-25.xlsx')
+    parser = SalesDashboardParser('../data/input/Payton YOY 8-18-24 to 8-19-25.xlsx')
     parser.load_data()
 
     # Get top 5 growing accounts
@@ -77,7 +77,7 @@ def example_5_frame_analysis():
     """Analyze which frames are performing well or poorly"""
     print("\n=== EXAMPLE 5: Frame Category Performance ===\n")
 
-    parser = SalesDashboardParser('Payton YOY 8-18-24 to 8-19-25.xlsx')
+    parser = SalesDashboardParser('../data/input/Payton YOY 8-18-24 to 8-19-25.xlsx')
     parser.load_data()
 
     frame_analysis = parser.get_frame_analysis()
@@ -97,7 +97,7 @@ def example_6_account_frame_details():
     """Get detailed frame purchases for specific accounts"""
     print("\n=== EXAMPLE 6: Frame Details for Specific Accounts ===\n")
 
-    parser = SalesDashboardParser('Payton YOY 8-18-24 to 8-19-25.xlsx')
+    parser = SalesDashboardParser('../data/input/Payton YOY 8-18-24 to 8-19-25.xlsx')
     parser.load_data()
 
     # Get top declining account
@@ -128,7 +128,7 @@ def example_7_export_for_dashboard():
     """Export data for use in web dashboard or other tools"""
     print("\n=== EXAMPLE 7: Export Data for Integration ===\n")
 
-    parser = SalesDashboardParser('Payton YOY 8-18-24 to 8-19-25.xlsx')
+    parser = SalesDashboardParser('../data/input/Payton YOY 8-18-24 to 8-19-25.xlsx')
     parser.load_data()
 
     # Export to JSON for web dashboard
@@ -151,7 +151,7 @@ def example_8_custom_analysis():
     """Custom analysis: Accounts in specific city"""
     print("\n=== EXAMPLE 8: Custom Analysis - Accounts by City ===\n")
 
-    parser = SalesDashboardParser('Payton YOY 8-18-24 to 8-19-25.xlsx')
+    parser = SalesDashboardParser('../data/input/Payton YOY 8-18-24 to 8-19-25.xlsx')
     parser.load_data()
 
     # Example: Find all Las Vegas accounts
@@ -174,7 +174,7 @@ def example_9_weekly_action_items():
     """Generate a weekly action item list for sales rep"""
     print("\n=== EXAMPLE 9: Weekly Action Items ===\n")
 
-    parser = SalesDashboardParser('Payton YOY 8-18-24 to 8-19-25.xlsx')
+    parser = SalesDashboardParser('../data/input/Payton YOY 8-18-24 to 8-19-25.xlsx')
     parser.load_data()
 
     print("SALES REP ACTION ITEMS - This Week\n")

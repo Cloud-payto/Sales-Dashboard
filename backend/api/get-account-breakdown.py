@@ -7,7 +7,7 @@ import tempfile
 # Add parent directory to path to import our parser
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from sales_comparison_parser import SalesComparisonParser
+from parsers.sales_comparison_parser import SalesComparisonParser
 
 def clean_nan_values(obj):
     """Recursively clean NaN values from nested dictionaries and lists"""

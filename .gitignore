@@ -62,14 +62,12 @@ env/
 .vercel
 
 # Output files from parser
-*.csv
-*.json
-!package.json
-!package-lock.json
-!tsconfig.json
-!tsconfig.node.json
-!vercel.json
-!src/**/*.json
+data/output/*.csv
+data/output/*.json
+backend/output/*.json
+
+# Google API key (sensitive)
+google/api-key.txt
 
 # Excel files (optional - uncomment if you don't want to commit Excel files)
 # *.xlsx
