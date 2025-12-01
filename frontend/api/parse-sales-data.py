@@ -10,6 +10,10 @@ from datetime import datetime
 # Add the api directory to path to import parsers
 sys.path.append(os.path.dirname(__file__))
 
+import traceback
+
+# Store import error for debugging
+import_error = None
 try:
     from parsers.sales_comparison_parser import SalesComparisonParser
     import pandas as pd
@@ -18,6 +22,7 @@ except ImportError as e:
     # Fallback if parser not available
     SalesComparisonParser = None
     pd = None
+    import_error = str(e) + "\n" + traceback.format_exc()
 
 def parse_multipart_form_data(data, boundary):
     """Parse multipart/form-data to extract BOTH files"""
@@ -89,7 +94,8 @@ class handler(BaseHTTPRequestHandler):
 
                 error_response = {
                     'error': 'Sales comparison parser not available',
-                    'message': 'Parser module could not be imported'
+                    'message': 'Parser module could not be imported',
+                    'import_error': import_error
                 }
                 self.wfile.write(json.dumps(error_response).encode())
                 return
@@ -177,7 +183,8 @@ class handler(BaseHTTPRequestHandler):
 
             error_response = {
                 'error': str(e),
-                'message': 'Failed to process files'
+                'message': 'Failed to process files',
+                'traceback': traceback.format_exc()
             }
             self.wfile.write(json.dumps(error_response).encode())
 
