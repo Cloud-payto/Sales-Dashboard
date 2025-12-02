@@ -291,6 +291,59 @@ declare namespace google {
       remove(): void;
     }
 
+    // Polygon class for drawing shapes on the map
+    class Polygon {
+      constructor(opts?: PolygonOptions);
+      setMap(map: Map | null): void;
+      getPath(): any;
+      getPaths(): any;
+      setOptions(options: PolygonOptions): void;
+      addListener(eventName: string, handler: Function): MapsEventListener;
+    }
+
+    interface PolygonOptions {
+      paths?: LatLngLiteral[] | LatLngLiteral[][] | LatLng[] | LatLng[][];
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeWeight?: number;
+      fillColor?: string;
+      fillOpacity?: number;
+      map?: Map;
+      clickable?: boolean;
+      draggable?: boolean;
+      editable?: boolean;
+      geodesic?: boolean;
+      visible?: boolean;
+      zIndex?: number;
+    }
+
+    // Circle class for drawing circles on the map
+    class Circle {
+      constructor(opts?: CircleOptions);
+      setMap(map: Map | null): void;
+      setCenter(center: LatLng | LatLngLiteral): void;
+      setRadius(radius: number): void;
+      getCenter(): LatLng;
+      getRadius(): number;
+      addListener(eventName: string, handler: Function): MapsEventListener;
+    }
+
+    interface CircleOptions {
+      center?: LatLng | LatLngLiteral;
+      radius?: number;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeWeight?: number;
+      fillColor?: string;
+      fillOpacity?: number;
+      map?: Map;
+      clickable?: boolean;
+      draggable?: boolean;
+      editable?: boolean;
+      visible?: boolean;
+      zIndex?: number;
+    }
+
     namespace event {
       function addListener(
         instance: any,

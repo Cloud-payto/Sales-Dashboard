@@ -1,10 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 import { useTerritory } from '../../contexts/TerritoryContext';
+import { useDashboard } from '../../contexts/DashboardContext';
 import { PHOENIX_METRO_CENTER } from '../../constants/territories';
 import { LIGHT_MAP_STYLE } from '../../constants/mapStyles';
 import { PlaceMarker } from '../../types/territory';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { CityData } from '../../types';
+import CityOverlay from './CityOverlay';
+import CityInsightsPanel from './CityInsightsPanel';
+import { Loader2, AlertCircle, Map, MapPin } from 'lucide-react';
 
 // Status labels for display
 const STATUS_LABELS: Record<string, string> = {
@@ -27,7 +31,16 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
 
   const { isLoaded, loadError } = useGoogleMaps();
   const { visibleMarkers, toggleMarkerSelection, selectedMarkers, isLoading, places } = useTerritory();
+  const { dashboardData } = useDashboard();
   const [isInitializing, setIsInitializing] = useState(true);
+
+  // City insights state
+  const [showCityBoundaries, setShowCityBoundaries] = useState(true);
+  const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
+  const [hoveredCity, setHoveredCity] = useState<CityData | null>(null);
+
+  // Get city insights data from dashboard
+  const cityInsights = dashboardData?.city_insights;
 
   // Initialize map
   useEffect(() => {
@@ -238,6 +251,25 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
     <div className={`relative w-full h-full ${className}`}>
       <div ref={mapRef} className="w-full h-full" />
 
+      {/* City Overlay - renders city boundaries */}
+      {isLoaded && mapInstanceRef.current && cityInsights && (
+        <CityOverlay
+          map={mapInstanceRef.current}
+          cities={cityInsights.cities}
+          showBoundaries={showCityBoundaries}
+          onCityClick={(city) => setSelectedCity(city)}
+          onCityHover={(city) => setHoveredCity(city)}
+        />
+      )}
+
+      {/* City Insights Panel - shows when a city is clicked */}
+      {selectedCity && (
+        <CityInsightsPanel
+          city={selectedCity}
+          onClose={() => setSelectedCity(null)}
+        />
+      )}
+
       {/* Loading overlay for places */}
       {(isInitializing || isLoading) && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
@@ -250,18 +282,63 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
         </div>
       )}
 
+      {/* Map Controls - City Boundaries Toggle */}
+      {!isLoading && !isInitializing && cityInsights && (
+        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-md overflow-hidden z-10">
+          <button
+            onClick={() => setShowCityBoundaries(!showCityBoundaries)}
+            className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors ${
+              showCityBoundaries
+                ? 'bg-blue-50 text-blue-700'
+                : 'bg-white text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <Map className="w-4 h-4" />
+            {showCityBoundaries ? 'Hide Cities' : 'Show Cities'}
+          </button>
+        </div>
+      )}
+
       {/* Places count indicator */}
       {!isLoading && !isInitializing && (
-        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-md px-3 py-2 text-sm">
-          <span className="font-medium text-gray-900">{visibleMarkers.length}</span>
-          <span className="text-gray-500 ml-1">
-            {visibleMarkers.length === 1 ? 'location' : 'locations'}
-          </span>
-          {places.length !== visibleMarkers.length && (
-            <span className="text-gray-400 ml-1">
-              of {places.length}
-            </span>
-          )}
+        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-md px-3 py-2 text-sm z-10">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-blue-600" />
+              <span className="font-medium text-gray-900">{visibleMarkers.length}</span>
+              <span className="text-gray-500">
+                {visibleMarkers.length === 1 ? 'location' : 'locations'}
+              </span>
+              {places.length !== visibleMarkers.length && (
+                <span className="text-gray-400">of {places.length}</span>
+              )}
+            </div>
+            {cityInsights && (
+              <>
+                <div className="w-px h-4 bg-gray-200" />
+                <div className="flex items-center gap-1.5">
+                  <Map className="w-4 h-4 text-green-600" />
+                  <span className="font-medium text-gray-900">{cityInsights.total_cities}</span>
+                  <span className="text-gray-500">cities</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Hovered City Quick Info */}
+      {hoveredCity && !selectedCity && (
+        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg px-4 py-3 z-20">
+          <div className="text-center">
+            <div className="font-semibold text-gray-900">{hoveredCity.city}</div>
+            <div className="text-sm text-gray-500 flex items-center gap-3 mt-1">
+              <span>{hoveredCity.total_accounts} accounts</span>
+              <span className={hoveredCity.units_change >= 0 ? 'text-green-600' : 'text-red-600'}>
+                {hoveredCity.units_change >= 0 ? '+' : ''}{hoveredCity.units_change.toLocaleString()} units
+              </span>
+            </div>
+          </div>
         </div>
       )}
     </div>
