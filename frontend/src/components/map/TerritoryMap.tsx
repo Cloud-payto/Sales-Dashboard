@@ -2,13 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 import { useTerritory } from '../../contexts/TerritoryContext';
 import { useDashboard } from '../../contexts/DashboardContext';
+import { useRoutes } from '../../contexts/RouteContext';
 import { PHOENIX_METRO_CENTER } from '../../constants/territories';
 import { LIGHT_MAP_STYLE } from '../../constants/mapStyles';
 import { PlaceMarker } from '../../types/territory';
 import { CityData } from '../../types';
 import CityOverlay from './CityOverlay';
 import CityInsightsPanel from './CityInsightsPanel';
-import { Loader2, AlertCircle, Map, MapPin } from 'lucide-react';
+import RouteManagerPanel from './RouteManagerPanel';
+import RouteAnalyticsPanel from './RouteAnalyticsPanel';
+import { Loader2, AlertCircle, Map, MapPin, GitBranch, BarChart3 } from 'lucide-react';
 
 // Status labels for display
 const STATUS_LABELS: Record<string, string> = {
@@ -38,6 +41,13 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
   const [showCityBoundaries, setShowCityBoundaries] = useState(true);
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
   const [hoveredCity, setHoveredCity] = useState<CityData | null>(null);
+
+  // Route management state
+  const [colorMode, setColorMode] = useState<'performance' | 'routes'>('performance');
+  const [showRouteManager, setShowRouteManager] = useState(false);
+  const [showRouteAnalytics, setShowRouteAnalytics] = useState(false);
+
+  const { routes, selectedRouteId, selectRoute } = useRoutes();
 
   // Get city insights data from dashboard
   const cityInsights = dashboardData?.city_insights;
@@ -257,6 +267,7 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
           map={mapInstanceRef.current}
           cities={cityInsights.cities}
           showBoundaries={showCityBoundaries}
+          colorMode={colorMode}
           onCityClick={(city) => setSelectedCity(city)}
           onCityHover={(city) => setHoveredCity(city)}
         />
@@ -282,21 +293,116 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
         </div>
       )}
 
-      {/* Map Controls - City Boundaries Toggle */}
+      {/* Map Controls - City Boundaries and Routes */}
       {!isLoading && !isInitializing && cityInsights && (
-        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-md overflow-hidden z-10">
-          <button
-            onClick={() => setShowCityBoundaries(!showCityBoundaries)}
-            className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors ${
-              showCityBoundaries
-                ? 'bg-blue-50 text-blue-700'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            <Map className="w-4 h-4" />
-            {showCityBoundaries ? 'Hide Cities' : 'Show Cities'}
-          </button>
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+          {/* City/Route Display Controls */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <button
+              onClick={() => setShowCityBoundaries(!showCityBoundaries)}
+              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors w-full ${
+                showCityBoundaries
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Map className="w-4 h-4" />
+              {showCityBoundaries ? 'Hide Cities' : 'Show Cities'}
+            </button>
+          </div>
+
+          {/* Color Mode Toggle */}
+          {showCityBoundaries && (
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="flex">
+                <button
+                  onClick={() => setColorMode('performance')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors ${
+                    colorMode === 'performance'
+                      ? 'bg-green-50 text-green-700'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Performance
+                </button>
+                <button
+                  onClick={() => setColorMode('routes')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors ${
+                    colorMode === 'routes'
+                      ? 'bg-purple-50 text-purple-700'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Routes
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Route Management Buttons */}
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <button
+              onClick={() => {
+                setShowRouteManager(!showRouteManager);
+                setShowRouteAnalytics(false);
+              }}
+              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors w-full ${
+                showRouteManager
+                  ? 'bg-purple-50 text-purple-700'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <GitBranch className="w-4 h-4" />
+              Manage Routes
+              {routes.length > 0 && (
+                <span className="ml-auto text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">
+                  {routes.length}
+                </span>
+              )}
+            </button>
+            <div className="border-t border-gray-100" />
+            <button
+              onClick={() => {
+                setShowRouteAnalytics(!showRouteAnalytics);
+                setShowRouteManager(false);
+              }}
+              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors w-full ${
+                showRouteAnalytics
+                  ? 'bg-indigo-50 text-indigo-700'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              Route Analytics
+            </button>
+          </div>
+
+          {/* Clear Route Selection */}
+          {selectedRouteId && (
+            <button
+              onClick={() => selectRoute(null)}
+              className="bg-white rounded-lg shadow-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              Clear Selection
+            </button>
+          )}
         </div>
+      )}
+
+      {/* Route Manager Panel */}
+      {showRouteManager && (
+        <RouteManagerPanel
+          onClose={() => setShowRouteManager(false)}
+          onSelectCity={(city) => setSelectedCity(city)}
+        />
+      )}
+
+      {/* Route Analytics Panel */}
+      {showRouteAnalytics && (
+        <RouteAnalyticsPanel
+          onClose={() => setShowRouteAnalytics(false)}
+          onSelectCity={(city) => setSelectedCity(city)}
+        />
       )}
 
       {/* Places count indicator */}

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { DashboardProvider } from './contexts/DashboardContext';
 import { FilterProvider } from './contexts/FilterContext';
 import { TerritoryProvider } from './contexts/TerritoryContext';
+import { RouteProvider } from './contexts/RouteContext';
 import Header from './components/Header';
 import FilterPanel from './components/FilterPanel';
 import HomePage from './pages/HomePage';
@@ -16,7 +17,8 @@ const AppContent: React.FC = () => {
   return (
     <FilterProvider>
       <TerritoryProvider>
-        <Router>
+        <RouteProvider>
+          <Router>
           <div className="min-h-screen bg-gray-50">
             <Header />
             <FilterPanel />
@@ -28,7 +30,8 @@ const AppContent: React.FC = () => {
               <Route path="/about" element={<AboutPage />} />
             </Routes>
           </div>
-        </Router>
+          </Router>
+        </RouteProvider>
       </TerritoryProvider>
     </FilterProvider>
   );

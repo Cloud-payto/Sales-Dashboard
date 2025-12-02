@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { CityData } from '../../types';
 import { CityBoundary, fetchCityBoundaries, getCityPerformanceColor, getCityOpacity } from '../../utils/cityBoundaries';
+import { useRoutes } from '../../contexts/RouteContext';
 import { Loader2 } from 'lucide-react';
 
 interface CityOverlayProps {
@@ -9,6 +10,7 @@ interface CityOverlayProps {
   onCityClick?: (city: CityData) => void;
   onCityHover?: (city: CityData | null) => void;
   showBoundaries?: boolean;
+  colorMode?: 'performance' | 'routes';  // How to color cities
 }
 
 interface CityPolygonData {
@@ -22,6 +24,7 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
   onCityClick,
   onCityHover,
   showBoundaries = true,
+  colorMode = 'performance',
 }) => {
   const [cityPolygons, setCityPolygons] = useState<CityPolygonData[]>([]);
   const [isLoadingBoundaries, setIsLoadingBoundaries] = useState(false);
@@ -30,22 +33,45 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const polygonsRef = useRef<any[]>([]);
 
+  const { routes, getCityRoute, selectedRouteId } = useRoutes();
+
   // Calculate max units for opacity scaling
   const maxUnits = Math.max(...cities.map(c => c.total_units_cy), 1);
+
+  // Get color for a city based on color mode
+  const getCityColor = useCallback((city: CityData): string => {
+    if (colorMode === 'routes') {
+      const route = getCityRoute(city.city);
+      if (route) {
+        return route.color;
+      }
+      return '#9ca3af'; // Gray for unassigned
+    }
+    return getCityPerformanceColor(city.units_change, city.units_change_pct);
+  }, [colorMode, getCityRoute]);
+
+  // Check if city should be highlighted (in selected route)
+  const isCityHighlighted = useCallback((cityName: string): boolean => {
+    if (!selectedRouteId) return false;
+    const route = routes.find(r => r.id === selectedRouteId);
+    return route?.cities.includes(cityName) || false;
+  }, [selectedRouteId, routes]);
 
   // Create info window content for a city
   const createInfoWindowContent = useCallback((city: CityData): string => {
     const changeColor = city.units_change >= 0 ? '#22c55e' : '#ef4444';
     const changeIcon = city.units_change >= 0 ? '↑' : '↓';
     const changePct = Math.abs(city.units_change_pct).toFixed(1);
+    const route = getCityRoute(city.city);
 
     return `
       <div style="padding: 16px; min-width: 280px; max-width: 350px; font-family: system-ui, -apple-system, sans-serif;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-          <div style="width: 10px; height: 10px; border-radius: 50%; background-color: ${getCityPerformanceColor(city.units_change, city.units_change_pct)};"></div>
+          <div style="width: 10px; height: 10px; border-radius: 50%; background-color: ${getCityColor(city)};"></div>
           <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #1f2937;">
             ${city.city}
           </h3>
+          ${route ? `<span style="font-size: 11px; padding: 2px 8px; background-color: ${route.color}20; color: ${route.color}; border-radius: 12px; font-weight: 500;">${route.name}</span>` : ''}
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
@@ -90,7 +116,7 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
         </div>
       </div>
     `;
-  }, []);
+  }, [getCityRoute, getCityColor]);
 
   // Fetch city boundaries when cities change
   useEffect(() => {
@@ -148,8 +174,13 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
 
     // Create polygons for each city
     cityPolygons.forEach(({ city, boundary }) => {
-      const color = getCityPerformanceColor(city.units_change, city.units_change_pct);
-      const opacity = getCityOpacity(city.total_units_cy, maxUnits);
+      const color = getCityColor(city);
+      const isHighlighted = isCityHighlighted(city.city);
+      const baseOpacity = getCityOpacity(city.total_units_cy, maxUnits);
+      // Dim non-highlighted cities when a route is selected
+      const opacity = selectedRouteId
+        ? (isHighlighted ? baseOpacity + 0.1 : baseOpacity * 0.3)
+        : baseOpacity;
 
       // Handle both single polygon and multi-polygon
       const polygonPaths = Array.isArray(boundary.polygon[0])
@@ -160,18 +191,19 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
         const polygon = new google.maps.Polygon({
           paths: path,
           strokeColor: color,
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
+          strokeOpacity: isHighlighted ? 1 : 0.8,
+          strokeWeight: isHighlighted ? 3 : 2,
           fillColor: color,
           fillOpacity: opacity,
           map,
+          zIndex: isHighlighted ? 10 : 1,
         });
 
         // Add hover effects
         polygon.addListener('mouseover', () => {
           polygon.setOptions({
-            strokeWeight: 3,
-            fillOpacity: opacity + 0.15,
+            strokeWeight: isHighlighted ? 4 : 3,
+            fillOpacity: Math.min(opacity + 0.15, 0.85),
           });
           onCityHover?.(city);
 
@@ -188,7 +220,7 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
 
         polygon.addListener('mouseout', () => {
           polygon.setOptions({
-            strokeWeight: 2,
+            strokeWeight: isHighlighted ? 3 : 2,
             fillOpacity: opacity,
           });
           onCityHover?.(null);
@@ -207,7 +239,7 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
       polygonsRef.current.forEach(p => p.setMap(null));
       polygonsRef.current = [];
     };
-  }, [map, cityPolygons, maxUnits, onCityClick, onCityHover, createInfoWindowContent]);
+  }, [map, cityPolygons, maxUnits, onCityClick, onCityHover, createInfoWindowContent, getCityColor, isCityHighlighted, selectedRouteId]);
 
   // Don't render anything if not showing boundaries
   if (!showBoundaries) return null;

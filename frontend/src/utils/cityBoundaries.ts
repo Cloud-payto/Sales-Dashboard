@@ -1,7 +1,14 @@
 /**
  * City Boundaries Utility
- * Fetches city boundary polygons from OpenStreetMap Nominatim API
+ *
+ * Uses pre-fetched city boundary data from a static JSON file.
+ * Falls back to Nominatim API if a city isn't in the pre-fetched data.
+ *
+ * To update the static data, run: node scripts/fetch_boundaries.js
  */
+
+// Import pre-fetched boundaries (will be empty object if file doesn't exist yet)
+import staticBoundaries from '../data/cityBoundaries.json';
 
 export interface CityBoundary {
   city: string;
@@ -34,40 +41,11 @@ interface NominatimResult {
   };
 }
 
-// Cache for city boundaries to avoid repeated API calls
-const boundaryCache = new Map<string, CityBoundary>();
-const CACHE_KEY = 'city_boundaries_cache';
+// Runtime cache for any API-fetched boundaries (supplements static data)
+const runtimeCache = new Map<string, CityBoundary>();
 
-// Load cache from localStorage
-function loadCache(): void {
-  try {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      Object.entries(parsed).forEach(([key, value]) => {
-        boundaryCache.set(key, value as CityBoundary);
-      });
-    }
-  } catch (e) {
-    console.warn('Failed to load city boundary cache:', e);
-  }
-}
-
-// Save cache to localStorage
-function saveCache(): void {
-  try {
-    const obj: Record<string, CityBoundary> = {};
-    boundaryCache.forEach((value, key) => {
-      obj[key] = value;
-    });
-    localStorage.setItem(CACHE_KEY, JSON.stringify(obj));
-  } catch (e) {
-    console.warn('Failed to save city boundary cache:', e);
-  }
-}
-
-// Initialize cache on load
-loadCache();
+// Type the static boundaries
+const preloadedBoundaries = staticBoundaries as Record<string, CityBoundary>;
 
 /**
  * Convert GeoJSON coordinates to Google Maps LatLngLiteral format
@@ -77,7 +55,7 @@ function geoJsonToLatLng(coordinates: number[][]): google.maps.LatLngLiteral[] {
 }
 
 /**
- * Fetch city boundary from Nominatim API
+ * Get city boundary - checks static data first, then runtime cache, then falls back to API
  */
 export async function fetchCityBoundary(
   cityName: string,
@@ -85,13 +63,20 @@ export async function fetchCityBoundary(
 ): Promise<CityBoundary | null> {
   const cacheKey = `${cityName}, ${state}`.toLowerCase();
 
-  // Check cache first
-  if (boundaryCache.has(cacheKey)) {
-    return boundaryCache.get(cacheKey)!;
+  // 1. Check pre-loaded static boundaries first (instant, no API call)
+  if (preloadedBoundaries[cacheKey]) {
+    return preloadedBoundaries[cacheKey];
   }
 
+  // 2. Check runtime cache
+  if (runtimeCache.has(cacheKey)) {
+    return runtimeCache.get(cacheKey)!;
+  }
+
+  // 3. Fallback to API for cities not in static data
+  console.log(`[CityBoundaries] Fetching ${cityName}, ${state} from API (not in static data)`);
+
   try {
-    // Use Nominatim API with polygon_geojson to get boundary
     const query = encodeURIComponent(`${cityName}, ${state}, USA`);
     const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&polygon_geojson=1&limit=1`;
 
@@ -118,10 +103,8 @@ export async function fetchCityBoundary(
     let polygon: google.maps.LatLngLiteral[] | google.maps.LatLngLiteral[][];
 
     if (geojson.type === 'Polygon') {
-      // Simple polygon - take the outer ring
       polygon = geoJsonToLatLng(geojson.coordinates[0] as number[][]);
     } else if (geojson.type === 'MultiPolygon') {
-      // MultiPolygon - convert all polygons
       polygon = (geojson.coordinates as number[][][][]).map((poly: number[][][]) =>
         geoJsonToLatLng(poly[0])
       );
@@ -143,9 +126,8 @@ export async function fetchCityBoundary(
       },
     };
 
-    // Cache the result
-    boundaryCache.set(cacheKey, boundary);
-    saveCache();
+    // Cache in runtime (not localStorage - static file is the source of truth)
+    runtimeCache.set(cacheKey, boundary);
 
     return boundary;
   } catch (error) {
@@ -155,8 +137,8 @@ export async function fetchCityBoundary(
 }
 
 /**
- * Fetch boundaries for multiple cities with rate limiting
- * Nominatim has a 1 request per second limit
+ * Fetch boundaries for multiple cities
+ * Uses static data when available, only calls API for missing cities
  */
 export async function fetchCityBoundaries(
   cities: string[],
@@ -164,19 +146,32 @@ export async function fetchCityBoundaries(
   onProgress?: (completed: number, total: number) => void
 ): Promise<Map<string, CityBoundary>> {
   const results = new Map<string, CityBoundary>();
+  const citiesToFetch: string[] = [];
 
-  for (let i = 0; i < cities.length; i++) {
-    const city = cities[i];
-
-    // Check if already cached
+  // First pass: get all cities from static data (instant)
+  for (const city of cities) {
     const cacheKey = `${city}, ${state}`.toLowerCase();
-    if (boundaryCache.has(cacheKey)) {
-      results.set(city, boundaryCache.get(cacheKey)!);
-      onProgress?.(i + 1, cities.length);
-      continue;
-    }
 
-    // Fetch with rate limiting (1 second delay between requests)
+    if (preloadedBoundaries[cacheKey]) {
+      results.set(city, preloadedBoundaries[cacheKey]);
+    } else if (runtimeCache.has(cacheKey)) {
+      results.set(city, runtimeCache.get(cacheKey)!);
+    } else {
+      citiesToFetch.push(city);
+    }
+  }
+
+  // Report progress for static lookups
+  const staticCount = cities.length - citiesToFetch.length;
+  if (staticCount > 0) {
+    onProgress?.(staticCount, cities.length);
+  }
+
+  // Second pass: fetch remaining from API with rate limiting
+  for (let i = 0; i < citiesToFetch.length; i++) {
+    const city = citiesToFetch[i];
+
+    // Rate limiting for API calls
     if (i > 0) {
       await new Promise(resolve => setTimeout(resolve, 1100));
     }
@@ -186,7 +181,7 @@ export async function fetchCityBoundaries(
       results.set(city, boundary);
     }
 
-    onProgress?.(i + 1, cities.length);
+    onProgress?.(staticCount + i + 1, cities.length);
   }
 
   return results;
@@ -215,9 +210,15 @@ export function getCityOpacity(totalUnits: number, maxUnits: number): number {
 }
 
 /**
- * Clear the boundary cache
+ * Check how many cities are in the static data
  */
-export function clearBoundaryCache(): void {
-  boundaryCache.clear();
-  localStorage.removeItem(CACHE_KEY);
+export function getStaticBoundaryCount(): number {
+  return Object.keys(preloadedBoundaries).length;
+}
+
+/**
+ * Get list of cities in static data
+ */
+export function getStaticCities(): string[] {
+  return Object.keys(preloadedBoundaries);
 }

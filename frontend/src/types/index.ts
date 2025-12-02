@@ -244,3 +244,30 @@ export interface DashboardData {
   sales_per_working_day?: SalesPerWorkingDay;
   city_insights?: CityInsights;
 }
+
+// Route/Zone Management Types
+export interface Route {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  cities: string[];  // Array of city names
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RouteAnalytics {
+  routeId: string;
+  routeName: string;
+  totalAccounts: number;
+  totalUnitsCY: number;
+  totalUnitsPY: number;
+  unitsChange: number;
+  unitsChangePct: number;
+  growingCount: number;
+  decliningCount: number;
+  lostCount: number;
+  newCount: number;
+  cities: CityData[];
+  colorGroupBreakdown: CityColorGroup[];
+}
