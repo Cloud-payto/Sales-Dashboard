@@ -1,6 +1,6 @@
 // Filter System Types for Sales Dashboard
 
-export type DataView = 'full' | 'territory_overview' | 'all_accounts' | 'territory_map';
+export type DataView = 'full' | 'city_insights' | 'territory_overview' | 'all_accounts' | 'territory_map';
 
 export type AccountSortOption =
   | 'sales_high'

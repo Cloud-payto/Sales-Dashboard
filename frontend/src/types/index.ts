@@ -174,6 +174,65 @@ export interface SalesPerWorkingDay {
   error?: string;
 }
 
+// City Insights Types
+export interface CityColorGroup {
+  color_group: string;
+  units: number;
+}
+
+export interface CityAccountChange {
+  account_number: number;
+  account_name: string;
+  previous_year_units: number;
+  current_year_units: number;
+  change: number;
+}
+
+export interface CityBrandMetric {
+  brand: string;
+  color_group: string;
+  accounts_buying_12_plus: number;
+  total_accounts_buying: number;
+  total_units: number;
+}
+
+export interface CityData {
+  city: string;
+  total_accounts: number;
+  total_units_cy: number;
+  total_units_py: number;
+  units_change: number;
+  units_change_pct: number;
+  accounts_by_brand_cy: CityBrandMetric[];
+  accounts_by_brand_py: CityBrandMetric[];
+  color_groups_cy: CityColorGroup[];
+  color_groups_py: CityColorGroup[];
+  growing_accounts: CityAccountChange[];
+  declining_accounts: CityAccountChange[];
+  lost_accounts: CityAccountChange[];
+  new_accounts: CityAccountChange[];
+  growing_count: number;
+  declining_count: number;
+  lost_count: number;
+  new_count: number;
+}
+
+export interface CityInsightsSummary {
+  total_units_cy: number;
+  total_units_py: number;
+  total_accounts: number;
+  total_growing: number;
+  total_declining: number;
+  total_lost: number;
+  total_new: number;
+}
+
+export interface CityInsights {
+  cities: CityData[];
+  total_cities: number;
+  summary: CityInsightsSummary;
+}
+
 export interface DashboardData {
   summary: SalesSummary;
   accounts: AccountsData;
@@ -183,4 +242,5 @@ export interface DashboardData {
   brand_comparison?: BrandComparison;
   accounts_per_brand?: AccountsPerBrand;
   sales_per_working_day?: SalesPerWorkingDay;
+  city_insights?: CityInsights;
 }

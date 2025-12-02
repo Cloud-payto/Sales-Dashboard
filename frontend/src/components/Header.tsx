@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   Building2,
   Map as MapIcon,
+  MapPin,
 } from 'lucide-react';
 import { useFilters } from '../contexts/FilterContext';
 import { DATA_VIEW_OPTIONS } from '../constants/filterOptions';
@@ -44,6 +45,8 @@ const Header: React.FC = () => {
         return <Building2 className="w-4 h-4" />;
       case 'MapIcon':
         return <MapIcon className="w-4 h-4" />;
+      case 'MapPinIcon':
+        return <MapPin className="w-4 h-4" />;
       default:
         return <LayoutDashboard className="w-4 h-4" />;
     }

@@ -19,6 +19,13 @@ export const DATA_VIEW_OPTIONS: DataViewOption[] = [
     description: 'Complete overview of all data',
   },
   {
+    value: 'city_insights',
+    label: 'City Insights',
+    icon: 'MapPinIcon',
+    description: 'Breakdown by city location',
+    badge: 'New',
+  },
+  {
     value: 'territory_overview',
     label: 'Territory Overview',
     icon: 'BarChart3',
@@ -35,7 +42,6 @@ export const DATA_VIEW_OPTIONS: DataViewOption[] = [
     label: 'Territory Map',
     icon: 'MapIcon',
     description: 'Geographic visualization',
-    badge: 'New',
   },
 ];
 

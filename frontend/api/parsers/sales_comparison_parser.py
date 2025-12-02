@@ -564,6 +564,245 @@ class SalesComparisonParser:
 
         return working_days
 
+    def get_city_insights(self) -> Dict:
+        """
+        Aggregate all metrics by city for city-level insights
+
+        Returns:
+            Dictionary with city-level aggregated data including:
+            - Total accounts per city
+            - Total sales per city (CY and PY)
+            - Accounts per brand by city
+            - Growing/declining/lost/new accounts by city
+            - Color group breakdown by city
+        """
+        cities_data = {}
+
+        # Get all brand changes (already has city info)
+        all_changes = self.get_customer_brand_changes()
+
+        # Step 1: Aggregate base metrics by city from current year data
+        for _, row in self.current_year_data.iterrows():
+            city = str(row.get('City', 'Unknown')).strip()
+            if not city or city == 'nan':
+                city = 'Unknown'
+
+            if city not in cities_data:
+                cities_data[city] = {
+                    'city': city,
+                    'total_accounts': 0,
+                    'total_units_cy': 0,
+                    'total_units_py': 0,
+                    'accounts_by_brand_cy': {},
+                    'accounts_by_brand_py': {},
+                    'accounts_by_color_group_cy': {},
+                    'accounts_by_color_group_py': {},
+                    'growing_accounts': [],
+                    'declining_accounts': [],
+                    'lost_accounts': [],
+                    'new_accounts': [],
+                    'account_numbers': set()
+                }
+
+            acct_num = row.get('Acct #')
+            if pd.notna(acct_num):
+                cities_data[city]['account_numbers'].add(int(acct_num))
+
+            # Sum units by brand for CY
+            for brand in self.brand_columns:
+                if brand in row and pd.notna(row[brand]):
+                    units = int(row[brand]) if isinstance(row[brand], (int, float)) else 0
+                    if units > 0:
+                        cities_data[city]['total_units_cy'] += units
+
+                        if brand not in cities_data[city]['accounts_by_brand_cy']:
+                            cities_data[city]['accounts_by_brand_cy'][brand] = {
+                                'brand': brand,
+                                'color_group': self.BRAND_COLOR_MAP.get(brand, 'OTHER'),
+                                'accounts_buying_12_plus': 0,
+                                'total_accounts_buying': 0,
+                                'total_units': 0
+                            }
+
+                        cities_data[city]['accounts_by_brand_cy'][brand]['total_accounts_buying'] += 1
+                        cities_data[city]['accounts_by_brand_cy'][brand]['total_units'] += units
+                        if units >= 12:
+                            cities_data[city]['accounts_by_brand_cy'][brand]['accounts_buying_12_plus'] += 1
+
+                        # Aggregate by color group
+                        color_group = self.BRAND_COLOR_MAP.get(brand, 'OTHER')
+                        if color_group not in cities_data[city]['accounts_by_color_group_cy']:
+                            cities_data[city]['accounts_by_color_group_cy'][color_group] = 0
+                        cities_data[city]['accounts_by_color_group_cy'][color_group] += units
+
+        # Step 2: Add previous year data
+        for _, row in self.previous_year_data.iterrows():
+            city = str(row.get('City', 'Unknown')).strip()
+            if not city or city == 'nan':
+                city = 'Unknown'
+
+            if city not in cities_data:
+                cities_data[city] = {
+                    'city': city,
+                    'total_accounts': 0,
+                    'total_units_cy': 0,
+                    'total_units_py': 0,
+                    'accounts_by_brand_cy': {},
+                    'accounts_by_brand_py': {},
+                    'accounts_by_color_group_cy': {},
+                    'accounts_by_color_group_py': {},
+                    'growing_accounts': [],
+                    'declining_accounts': [],
+                    'lost_accounts': [],
+                    'new_accounts': [],
+                    'account_numbers': set()
+                }
+
+            acct_num = row.get('Acct #')
+            if pd.notna(acct_num):
+                cities_data[city]['account_numbers'].add(int(acct_num))
+
+            # Sum units by brand for PY
+            for brand in self.brand_columns:
+                if brand in row and pd.notna(row[brand]):
+                    units = int(row[brand]) if isinstance(row[brand], (int, float)) else 0
+                    if units > 0:
+                        cities_data[city]['total_units_py'] += units
+
+                        if brand not in cities_data[city]['accounts_by_brand_py']:
+                            cities_data[city]['accounts_by_brand_py'][brand] = {
+                                'brand': brand,
+                                'color_group': self.BRAND_COLOR_MAP.get(brand, 'OTHER'),
+                                'accounts_buying_12_plus': 0,
+                                'total_accounts_buying': 0,
+                                'total_units': 0
+                            }
+
+                        cities_data[city]['accounts_by_brand_py'][brand]['total_accounts_buying'] += 1
+                        cities_data[city]['accounts_by_brand_py'][brand]['total_units'] += units
+                        if units >= 12:
+                            cities_data[city]['accounts_by_brand_py'][brand]['accounts_buying_12_plus'] += 1
+
+                        # Aggregate by color group
+                        color_group = self.BRAND_COLOR_MAP.get(brand, 'OTHER')
+                        if color_group not in cities_data[city]['accounts_by_color_group_py']:
+                            cities_data[city]['accounts_by_color_group_py'][color_group] = 0
+                        cities_data[city]['accounts_by_color_group_py'][color_group] += units
+
+        # Step 3: Calculate account changes by city
+        account_changes_by_city = {}
+        for change in all_changes:
+            city = change['city']
+            if not city or city == 'nan':
+                city = 'Unknown'
+            acct_num = change['account_number']
+            key = f"{city}_{acct_num}"
+
+            if key not in account_changes_by_city:
+                account_changes_by_city[key] = {
+                    'city': city,
+                    'account_number': acct_num,
+                    'account_name': change['account_name'],
+                    'total_py': 0,
+                    'total_cy': 0,
+                    'total_change': 0
+                }
+
+            account_changes_by_city[key]['total_py'] += change['previous_year_units']
+            account_changes_by_city[key]['total_cy'] += change['current_year_units']
+            account_changes_by_city[key]['total_change'] += change['change']
+
+        # Categorize accounts by city
+        for key, acct in account_changes_by_city.items():
+            city = acct['city']
+            if city not in cities_data:
+                continue
+
+            account_info = {
+                'account_number': acct['account_number'],
+                'account_name': acct['account_name'],
+                'previous_year_units': acct['total_py'],
+                'current_year_units': acct['total_cy'],
+                'change': acct['total_change']
+            }
+
+            if acct['total_py'] > 0 and acct['total_cy'] == 0:
+                cities_data[city]['lost_accounts'].append(account_info)
+            elif acct['total_py'] == 0 and acct['total_cy'] > 0:
+                cities_data[city]['new_accounts'].append(account_info)
+            elif acct['total_change'] > 0:
+                cities_data[city]['growing_accounts'].append(account_info)
+            elif acct['total_change'] < 0:
+                cities_data[city]['declining_accounts'].append(account_info)
+
+        # Step 4: Finalize city data
+        result = []
+        for city, data in cities_data.items():
+            # Convert set to count
+            data['total_accounts'] = len(data['account_numbers'])
+            del data['account_numbers']  # Remove set (not JSON serializable)
+
+            # Convert brand dicts to sorted lists
+            data['accounts_by_brand_cy'] = sorted(
+                list(data['accounts_by_brand_cy'].values()),
+                key=lambda x: x['accounts_buying_12_plus'],
+                reverse=True
+            )
+            data['accounts_by_brand_py'] = sorted(
+                list(data['accounts_by_brand_py'].values()),
+                key=lambda x: x['accounts_buying_12_plus'],
+                reverse=True
+            )
+
+            # Convert color group dicts to sorted lists
+            data['color_groups_cy'] = [
+                {'color_group': cg, 'units': units}
+                for cg, units in sorted(data['accounts_by_color_group_cy'].items(), key=lambda x: x[1], reverse=True)
+            ]
+            data['color_groups_py'] = [
+                {'color_group': cg, 'units': units}
+                for cg, units in sorted(data['accounts_by_color_group_py'].items(), key=lambda x: x[1], reverse=True)
+            ]
+            del data['accounts_by_color_group_cy']
+            del data['accounts_by_color_group_py']
+
+            # Sort account lists by impact
+            data['growing_accounts'].sort(key=lambda x: x['change'], reverse=True)
+            data['declining_accounts'].sort(key=lambda x: x['change'])
+            data['lost_accounts'].sort(key=lambda x: x['previous_year_units'], reverse=True)
+            data['new_accounts'].sort(key=lambda x: x['current_year_units'], reverse=True)
+
+            # Add summary counts
+            data['growing_count'] = len(data['growing_accounts'])
+            data['declining_count'] = len(data['declining_accounts'])
+            data['lost_count'] = len(data['lost_accounts'])
+            data['new_count'] = len(data['new_accounts'])
+
+            # Calculate YOY change
+            data['units_change'] = data['total_units_cy'] - data['total_units_py']
+            data['units_change_pct'] = round(
+                ((data['total_units_cy'] / data['total_units_py']) - 1) * 100, 2
+            ) if data['total_units_py'] > 0 else 0
+
+            result.append(data)
+
+        # Sort cities by total units CY (largest first)
+        result.sort(key=lambda x: x['total_units_cy'], reverse=True)
+
+        return {
+            'cities': result,
+            'total_cities': len(result),
+            'summary': {
+                'total_units_cy': sum(c['total_units_cy'] for c in result),
+                'total_units_py': sum(c['total_units_py'] for c in result),
+                'total_accounts': sum(c['total_accounts'] for c in result),
+                'total_growing': sum(c['growing_count'] for c in result),
+                'total_declining': sum(c['declining_count'] for c in result),
+                'total_lost': sum(c['lost_count'] for c in result),
+                'total_new': sum(c['new_count'] for c in result)
+            }
+        }
+
     def get_sales_per_working_day(self) -> Dict:
         """
         Calculate sales per working day excluding bank holidays
@@ -644,6 +883,9 @@ class SalesComparisonParser:
         # NEW: Add sales per working day metrics
         sales_per_working_day = self.get_sales_per_working_day()
 
+        # NEW: Add city-level insights
+        city_insights = self.get_city_insights()
+
         # Enhance base summary with comparison data
         base_summary['brand_comparison'] = {
             'all_customer_brand_changes': all_brand_changes,
@@ -659,6 +901,7 @@ class SalesComparisonParser:
         # Add new features to base summary
         base_summary['accounts_per_brand'] = accounts_per_brand
         base_summary['sales_per_working_day'] = sales_per_working_day
+        base_summary['city_insights'] = city_insights
 
         return base_summary
 

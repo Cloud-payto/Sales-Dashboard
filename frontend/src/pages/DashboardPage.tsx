@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Upload, BarChart3, ChevronDown } from 'lucide-react';
+import { Upload, BarChart3 } from 'lucide-react';
 import { useDashboard } from '../contexts/DashboardContext';
+import { useFilters } from '../contexts/FilterContext';
 import MetricCard from '../components/MetricCard';
 import FramePerformanceChart from '../components/TrafficChart';
 import AccountsTable from '../components/AccountsTable';
@@ -10,13 +11,11 @@ import InsightsPanel from '../components/InsightsPanel';
 import AllAccountsView from '../components/AllAccountsView';
 import AccountsPerBrand from '../components/AccountsPerBrand';
 import SalesPerWorkingDay from '../components/SalesPerWorkingDay';
-
-type ViewMode = 'territory' | 'accounts';
+import CityInsightsView from '../components/CityInsightsView';
 
 const DashboardPage: React.FC = () => {
   const { dashboardData, isLoading } = useDashboard();
-  const [viewMode, setViewMode] = useState<ViewMode>('territory');
-  const [showViewDropdown, setShowViewDropdown] = useState(false);
+  const { filters } = useFilters();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -91,7 +90,159 @@ const DashboardPage: React.FC = () => {
   }
 
   // Dashboard with data
-  const { summary, accounts, frames, brands, insights, brand_comparison, accounts_per_brand, sales_per_working_day } = dashboardData;
+  const { summary, accounts, frames, brands, insights, brand_comparison, accounts_per_brand, sales_per_working_day, city_insights } = dashboardData;
+
+  // Determine which view to show based on filters.dataView
+  const renderMainContent = () => {
+    switch (filters.dataView) {
+      case 'city_insights':
+        return city_insights ? (
+          <CityInsightsView data={city_insights} />
+        ) : (
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <p className="text-gray-500">City insights data is not available. Please re-upload your YOY analysis files.</p>
+          </div>
+        );
+
+      case 'all_accounts':
+        return (
+          <AllAccountsView
+            accounts={[
+              ...accounts.top_declining,
+              ...accounts.top_increasing,
+              ...accounts.new_accounts,
+              ...accounts.reactivated_accounts
+            ]}
+            brandComparison={brand_comparison?.all_customer_brand_changes}
+          />
+        );
+
+      case 'full':
+      case 'territory_overview':
+      default:
+        return (
+          <>
+            {/* Key Insights Panel */}
+            <InsightsPanel insights={insights} />
+
+            {/* Primary Metrics Grid */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Territory Performance</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <MetricCard
+                  label="Total Sales"
+                  value={formatCurrency(summary.total_sales_cy)}
+                  subtitle={`vs ${formatCurrency(summary.total_sales_py)} PY`}
+                  change={summary.total_sales_pct_change}
+                  icon="sales"
+                  trend={summary.total_sales_pct_change > 0 ? 'up' : 'down'}
+                />
+                <MetricCard
+                  label="Total Customers"
+                  value={formatNumber(summary.total_accounts)}
+                  subtitle={`${summary.total_accounts - summary.total_accounts_py} more than PY`}
+                  icon="accounts"
+                  trend="up"
+                />
+                <MetricCard
+                  label="Customer Average"
+                  value={formatCurrency(summary.account_average)}
+                  subtitle="Per customer sales"
+                  icon="average"
+                  trend="neutral"
+                />
+                <MetricCard
+                  label="Retention Rate"
+                  value={`${summary.retention_rate.toFixed(1)}%`}
+                  subtitle={`${summary.lost_accounts} customers lost`}
+                  icon="accounts"
+                  trend="up"
+                />
+              </div>
+            </div>
+
+            {/* Customer Performance Metrics */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Customer Performance</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <MetricCard
+                  label="Growing Customers"
+                  value={formatNumber(summary.increasing_accounts)}
+                  changeLabel={formatCurrency(summary.increasing_accounts_sales)}
+                  icon="growing"
+                  trend="up"
+                />
+                <MetricCard
+                  label="Declining Customers"
+                  value={formatNumber(summary.declining_accounts)}
+                  changeLabel={formatCurrency(summary.declining_accounts_sales)}
+                  icon="declining"
+                  trend="down"
+                />
+                <MetricCard
+                  label="New Customers"
+                  value={formatNumber(summary.new_accounts)}
+                  changeLabel={formatCurrency(summary.new_accounts_sales)}
+                  icon="new"
+                  trend="up"
+                />
+                <MetricCard
+                  label="Reactivated"
+                  value={formatNumber(summary.reactivated_accounts)}
+                  changeLabel={formatCurrency(summary.reactivated_accounts_sales)}
+                  icon="new"
+                  trend="up"
+                />
+              </div>
+            </div>
+
+            {/* Sales per Working Day */}
+            {sales_per_working_day && (
+              <SalesPerWorkingDay data={sales_per_working_day} />
+            )}
+
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <FramePerformanceChart
+                topGrowth={frames.increasing}
+                topDecline={frames.declining}
+                colorGroupDrillDowns={brand_comparison?.color_group_drill_downs}
+              />
+              <BrandPerformance brands={brands.brands} showTop={10} totalAccounts={summary.total_accounts} />
+            </div>
+
+            {/* Accounts per Brand */}
+            {accounts_per_brand && (
+              <AccountsPerBrand data={accounts_per_brand} />
+            )}
+
+            {/* Customer Tables */}
+            <div className="space-y-6">
+              <AccountsTable
+                accounts={accounts.top_declining}
+                title="Bottom Performing Customers"
+                type="declining"
+                brandComparison={brand_comparison?.all_customer_brand_changes}
+              />
+
+              <AccountsTable
+                accounts={accounts.top_increasing}
+                title="Top Performing Customers"
+                type="growing"
+                brandComparison={brand_comparison?.all_customer_brand_changes}
+              />
+
+              <AccountsTable
+                accounts={[...accounts.new_accounts, ...accounts.reactivated_accounts]}
+                title="New & Reactivated Customers"
+                type="new"
+                brandComparison={brand_comparison?.all_customer_brand_changes}
+              />
+            </div>
+          </>
+        );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -99,62 +250,11 @@ const DashboardPage: React.FC = () => {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Sales Analytics Dashboard</h1>
-                <p className="text-gray-600 mt-2">
-                  Year-over-year performance overview and insights
-                </p>
-              </div>
-
-              {/* View Switcher Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowViewDropdown(!showViewDropdown)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium text-gray-700"
-                >
-                  {viewMode === 'territory' ? 'Territory Overview' : 'All Accounts'}
-                  <ChevronDown className="w-4 h-4" />
-                </button>
-
-                {showViewDropdown && (
-                  <>
-                    {/* Backdrop */}
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setShowViewDropdown(false)}
-                    />
-
-                    {/* Dropdown Menu */}
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
-                      <button
-                        onClick={() => {
-                          setViewMode('territory');
-                          setShowViewDropdown(false);
-                        }}
-                        className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors ${
-                          viewMode === 'territory' ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-700'
-                        }`}
-                      >
-                        <div className="font-medium">Territory Overview</div>
-                        <div className="text-xs text-gray-500 mt-0.5">Performance metrics & insights</div>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setViewMode('accounts');
-                          setShowViewDropdown(false);
-                        }}
-                        className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors border-t border-gray-100 ${
-                          viewMode === 'accounts' ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-700'
-                        }`}
-                      >
-                        <div className="font-medium">All Accounts</div>
-                        <div className="text-xs text-gray-500 mt-0.5">Complete customer list with sorting</div>
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Sales Analytics Dashboard</h1>
+              <p className="text-gray-600 mt-2">
+                Year-over-year performance overview and insights
+              </p>
             </div>
 
             <div className="flex items-center gap-4">
@@ -176,140 +276,7 @@ const DashboardPage: React.FC = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {viewMode === 'territory' ? (
-          <>
-            {/* Key Insights Panel */}
-            <InsightsPanel insights={insights} />
-
-        {/* Primary Metrics Grid */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Territory Performance</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard
-              label="Total Sales"
-              value={formatCurrency(summary.total_sales_cy)}
-              subtitle={`vs ${formatCurrency(summary.total_sales_py)} PY`}
-              change={summary.total_sales_pct_change}
-              icon="sales"
-              trend={summary.total_sales_pct_change > 0 ? 'up' : 'down'}
-            />
-            <MetricCard
-              label="Total Customers"
-              value={formatNumber(summary.total_accounts)}
-              subtitle={`${summary.total_accounts - summary.total_accounts_py} more than PY`}
-              icon="accounts"
-              trend="up"
-            />
-            <MetricCard
-              label="Customer Average"
-              value={formatCurrency(summary.account_average)}
-              subtitle="Per customer sales"
-              icon="average"
-              trend="neutral"
-            />
-            <MetricCard
-              label="Retention Rate"
-              value={`${summary.retention_rate.toFixed(1)}%`}
-              subtitle={`${summary.lost_accounts} customers lost`}
-              icon="accounts"
-              trend="up"
-            />
-          </div>
-        </div>
-
-        {/* Customer Performance Metrics */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Customer Performance</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard
-              label="Growing Customers"
-              value={formatNumber(summary.increasing_accounts)}
-              changeLabel={formatCurrency(summary.increasing_accounts_sales)}
-              icon="growing"
-              trend="up"
-            />
-            <MetricCard
-              label="Declining Customers"
-              value={formatNumber(summary.declining_accounts)}
-              changeLabel={formatCurrency(summary.declining_accounts_sales)}
-              icon="declining"
-              trend="down"
-            />
-            <MetricCard
-              label="New Customers"
-              value={formatNumber(summary.new_accounts)}
-              changeLabel={formatCurrency(summary.new_accounts_sales)}
-              icon="new"
-              trend="up"
-            />
-            <MetricCard
-              label="Reactivated"
-              value={formatNumber(summary.reactivated_accounts)}
-              changeLabel={formatCurrency(summary.reactivated_accounts_sales)}
-              icon="new"
-              trend="up"
-            />
-          </div>
-        </div>
-
-        {/* Sales per Working Day */}
-        {sales_per_working_day && (
-          <SalesPerWorkingDay data={sales_per_working_day} />
-        )}
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <FramePerformanceChart
-            topGrowth={frames.increasing}
-            topDecline={frames.declining}
-            colorGroupDrillDowns={brand_comparison?.color_group_drill_downs}
-          />
-          <BrandPerformance brands={brands.brands} showTop={10} totalAccounts={summary.total_accounts} />
-        </div>
-
-        {/* Accounts per Brand */}
-        {accounts_per_brand && (
-          <AccountsPerBrand data={accounts_per_brand} />
-        )}
-
-        {/* Customer Tables */}
-        <div className="space-y-6">
-          <AccountsTable
-            accounts={accounts.top_declining}
-            title="Bottom Performing Customers"
-            type="declining"
-            brandComparison={brand_comparison?.all_customer_brand_changes}
-          />
-
-          <AccountsTable
-            accounts={accounts.top_increasing}
-            title="Top Performing Customers"
-            type="growing"
-            brandComparison={brand_comparison?.all_customer_brand_changes}
-          />
-
-          <AccountsTable
-            accounts={[...accounts.new_accounts, ...accounts.reactivated_accounts]}
-            title="New & Reactivated Customers"
-            type="new"
-            brandComparison={brand_comparison?.all_customer_brand_changes}
-          />
-        </div>
-          </>
-        ) : (
-          <>
-            {/* All Accounts View */}
-            <AllAccountsView
-              accounts={[
-                ...accounts.top_declining,
-                ...accounts.top_increasing,
-                ...accounts.new_accounts,
-                ...accounts.reactivated_accounts
-              ]}
-              brandComparison={brand_comparison?.all_customer_brand_changes}
-            />
-          </>
-        )}
+        {renderMainContent()}
       </main>
     </div>
   );
