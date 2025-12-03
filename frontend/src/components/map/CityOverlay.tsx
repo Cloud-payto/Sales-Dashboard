@@ -9,6 +9,7 @@ interface CityOverlayProps {
   cities: CityData[];
   onCityClick?: (city: CityData) => void;
   onCityHover?: (city: CityData | null) => void;
+  onAssignCity?: (cityName: string, routeId: string) => void;
   showBoundaries?: boolean;
   colorMode?: 'performance' | 'routes';  // How to color cities
 }
@@ -23,6 +24,7 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
   cities,
   onCityClick,
   onCityHover,
+  onAssignCity,
   showBoundaries = true,
   colorMode = 'performance',
 }) => {
@@ -33,7 +35,27 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const polygonsRef = useRef<any[]>([]);
 
-  const { routes, getCityRoute, selectedRouteId } = useRoutes();
+  const { routes, getCityRoute, selectedRouteId, addCityToRoute } = useRoutes();
+
+  // Register global callback for info window buttons
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__assignCityToRoute = (cityName: string, routeId: string) => {
+      addCityToRoute(routeId, cityName);
+      if (onAssignCity) {
+        onAssignCity(cityName, routeId);
+      }
+      // Close info window after assignment
+      if (infoWindowRef.current) {
+        infoWindowRef.current.close();
+      }
+    };
+
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).__assignCityToRoute;
+    };
+  }, [addCityToRoute, onAssignCity]);
 
   // Calculate max units for opacity scaling
   const maxUnits = Math.max(...cities.map(c => c.total_units_cy), 1);
@@ -63,6 +85,28 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
     const changeIcon = city.units_change >= 0 ? '↑' : '↓';
     const changePct = Math.abs(city.units_change_pct).toFixed(1);
     const route = getCityRoute(city.city);
+
+    // Build route assignment buttons HTML
+    const routeButtonsHtml = routes.length > 0 && !route
+      ? `
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+          <div style="font-size: 11px; color: #6b7280; margin-bottom: 8px; text-align: center;">Add to route:</div>
+          <div style="display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;">
+            ${routes.slice(0, 6).map(r => `
+              <button
+                onclick="window.__assignCityToRoute && window.__assignCityToRoute('${city.city}', '${r.id}')"
+                style="display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: ${r.color}15; border: 1px solid ${r.color}40; border-radius: 12px; cursor: pointer; font-size: 11px; color: ${r.color}; font-weight: 500; transition: all 0.15s;"
+                onmouseover="this.style.background='${r.color}25'"
+                onmouseout="this.style.background='${r.color}15'"
+              >
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: ${r.color};"></span>
+                ${r.name}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `
+      : '';
 
     return `
       <div style="padding: 16px; min-width: 280px; max-width: 350px; font-family: system-ui, -apple-system, sans-serif;">
@@ -111,12 +155,14 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
           </div>
         </div>
 
+        ${routeButtonsHtml}
+
         <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; text-align: center;">
           Click for detailed city insights
         </div>
       </div>
     `;
-  }, [getCityRoute, getCityColor]);
+  }, [getCityRoute, getCityColor, routes]);
 
   // Fetch city boundaries when cities change
   useEffect(() => {

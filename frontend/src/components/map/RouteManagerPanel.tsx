@@ -97,7 +97,7 @@ const RouteManagerPanel: React.FC<RouteManagerPanelProps> = ({ onClose, onSelect
   };
 
   return (
-    <div className="absolute top-20 right-4 w-96 max-h-[calc(100vh-10rem)] bg-white rounded-xl shadow-xl border border-gray-200 z-30 flex flex-col">
+    <div className="absolute top-20 left-4 w-96 max-h-[calc(100vh-10rem)] bg-white rounded-xl shadow-xl border border-gray-200 z-30 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">Route Manager</h2>

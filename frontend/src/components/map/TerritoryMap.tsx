@@ -11,7 +11,7 @@ import CityOverlay from './CityOverlay';
 import CityInsightsPanel from './CityInsightsPanel';
 import RouteManagerPanel from './RouteManagerPanel';
 import RouteAnalyticsPanel from './RouteAnalyticsPanel';
-import { Loader2, AlertCircle, Map, MapPin, GitBranch, BarChart3 } from 'lucide-react';
+import { Loader2, AlertCircle, Map, MapPin, GitBranch, BarChart3, Settings, Minimize2 } from 'lucide-react';
 
 // Status labels for display
 const STATUS_LABELS: Record<string, string> = {
@@ -46,8 +46,10 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
   const [colorMode, setColorMode] = useState<'performance' | 'routes'>('performance');
   const [showRouteManager, setShowRouteManager] = useState(false);
   const [showRouteAnalytics, setShowRouteAnalytics] = useState(false);
+  const [controlsMinimized, setControlsMinimized] = useState(false);
 
-  const { routes, selectedRouteId, selectRoute } = useRoutes();
+
+  const { routes, selectedRouteId, selectRoute, addCityToRoute, getCityRoute } = useRoutes();
 
   // Get city insights data from dashboard
   const cityInsights = dashboardData?.city_insights;
@@ -270,6 +272,10 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
           colorMode={colorMode}
           onCityClick={(city) => setSelectedCity(city)}
           onCityHover={(city) => setHoveredCity(city)}
+          onAssignCity={() => {
+            // City was assigned to a route from the info window
+            // The CityOverlay handles the actual assignment
+          }}
         />
       )}
 
@@ -293,98 +299,121 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
         </div>
       )}
 
-      {/* Map Controls - City Boundaries and Routes */}
+      {/* Map Controls - Floating Toolbar (Top Right) */}
       {!isLoading && !isInitializing && cityInsights && (
-        <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
-          {/* City/Route Display Controls */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="absolute top-4 right-4 z-10">
+          {/* Collapsed Controls - Single Icon Button */}
+          {controlsMinimized ? (
             <button
-              onClick={() => setShowCityBoundaries(!showCityBoundaries)}
-              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors w-full ${
-                showCityBoundaries
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
+              onClick={() => setControlsMinimized(false)}
+              className="bg-white rounded-lg shadow-md p-2.5 hover:bg-gray-50 transition-colors"
+              title="Show Map Controls"
             >
-              <Map className="w-4 h-4" />
-              {showCityBoundaries ? 'Hide Cities' : 'Show Cities'}
+              <Settings className="w-5 h-5 text-gray-600" />
             </button>
-          </div>
-
-          {/* Color Mode Toggle */}
-          {showCityBoundaries && (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="flex">
+          ) : (
+            <div className="flex flex-col gap-2">
+              {/* Header with minimize button */}
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+                  <span className="text-xs font-medium text-gray-500">Controls</span>
+                  <button
+                    onClick={() => setControlsMinimized(true)}
+                    className="p-0.5 hover:bg-gray-100 rounded transition-colors"
+                    title="Minimize Controls"
+                  >
+                    <Minimize2 className="w-3.5 h-3.5 text-gray-400" />
+                  </button>
+                </div>
                 <button
-                  onClick={() => setColorMode('performance')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors ${
-                    colorMode === 'performance'
-                      ? 'bg-green-50 text-green-700'
+                  onClick={() => setShowCityBoundaries(!showCityBoundaries)}
+                  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors w-full ${
+                    showCityBoundaries
+                      ? 'bg-blue-50 text-blue-700'
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  Performance
+                  <Map className="w-4 h-4" />
+                  {showCityBoundaries ? 'Hide Cities' : 'Show Cities'}
                 </button>
+              </div>
+
+              {/* Color Mode Toggle */}
+              {showCityBoundaries && (
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="flex">
+                    <button
+                      onClick={() => setColorMode('performance')}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors ${
+                        colorMode === 'performance'
+                          ? 'bg-green-50 text-green-700'
+                          : 'bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      Performance
+                    </button>
+                    <button
+                      onClick={() => setColorMode('routes')}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors ${
+                        colorMode === 'routes'
+                          ? 'bg-purple-50 text-purple-700'
+                          : 'bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      Routes
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Route Management Buttons */}
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <button
-                  onClick={() => setColorMode('routes')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors ${
-                    colorMode === 'routes'
+                  onClick={() => {
+                    setShowRouteManager(!showRouteManager);
+                    setShowRouteAnalytics(false);
+                  }}
+                  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors w-full ${
+                    showRouteManager
                       ? 'bg-purple-50 text-purple-700'
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  Routes
+                  <GitBranch className="w-4 h-4" />
+                  Manage Routes
+                  {routes.length > 0 && (
+                    <span className="ml-auto text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">
+                      {routes.length}
+                    </span>
+                  )}
+                </button>
+                <div className="border-t border-gray-100" />
+                <button
+                  onClick={() => {
+                    setShowRouteAnalytics(!showRouteAnalytics);
+                    setShowRouteManager(false);
+                  }}
+                  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors w-full ${
+                    showRouteAnalytics
+                      ? 'bg-indigo-50 text-indigo-700'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Route Analytics
                 </button>
               </div>
-            </div>
-          )}
 
-          {/* Route Management Buttons */}
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <button
-              onClick={() => {
-                setShowRouteManager(!showRouteManager);
-                setShowRouteAnalytics(false);
-              }}
-              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors w-full ${
-                showRouteManager
-                  ? 'bg-purple-50 text-purple-700'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <GitBranch className="w-4 h-4" />
-              Manage Routes
-              {routes.length > 0 && (
-                <span className="ml-auto text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">
-                  {routes.length}
-                </span>
+              {/* Clear Route Selection */}
+              {selectedRouteId && (
+                <button
+                  onClick={() => selectRoute(null)}
+                  className="bg-white rounded-lg shadow-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Clear Selection
+                </button>
               )}
-            </button>
-            <div className="border-t border-gray-100" />
-            <button
-              onClick={() => {
-                setShowRouteAnalytics(!showRouteAnalytics);
-                setShowRouteManager(false);
-              }}
-              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors w-full ${
-                showRouteAnalytics
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              Route Analytics
-            </button>
-          </div>
-
-          {/* Clear Route Selection */}
-          {selectedRouteId && (
-            <button
-              onClick={() => selectRoute(null)}
-              className="bg-white rounded-lg shadow-md px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              Clear Selection
-            </button>
+            </div>
           )}
         </div>
       )}
@@ -433,17 +462,56 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
         </div>
       )}
 
-      {/* Hovered City Quick Info */}
+      {/* Hovered City Quick Info with Route Assignment */}
       {hoveredCity && !selectedCity && (
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg px-4 py-3 z-20">
+        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg px-4 py-3 z-20 min-w-[280px]">
           <div className="text-center">
             <div className="font-semibold text-gray-900">{hoveredCity.city}</div>
-            <div className="text-sm text-gray-500 flex items-center gap-3 mt-1">
+            <div className="text-sm text-gray-500 flex items-center justify-center gap-3 mt-1">
               <span>{hoveredCity.total_accounts} accounts</span>
               <span className={hoveredCity.units_change >= 0 ? 'text-green-600' : 'text-red-600'}>
                 {hoveredCity.units_change >= 0 ? '+' : ''}{hoveredCity.units_change.toLocaleString()} units
               </span>
             </div>
+
+            {/* Route Assignment */}
+            {routes.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-100">
+                {(() => {
+                  const currentRoute = getCityRoute(hoveredCity.city);
+                  return currentRoute ? (
+                    <div className="flex items-center justify-center gap-2 text-sm">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: currentRoute.color }}
+                      />
+                      <span className="text-gray-600">In route: <span className="font-medium">{currentRoute.name}</span></span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-xs text-gray-500">Add to route:</span>
+                      <div className="flex gap-1">
+                        {routes.slice(0, 4).map((route) => (
+                          <button
+                            key={route.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addCityToRoute(route.id, hoveredCity.city);
+                            }}
+                            className="w-6 h-6 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
+                            style={{ backgroundColor: route.color }}
+                            title={`Add to ${route.name}`}
+                          />
+                        ))}
+                        {routes.length > 4 && (
+                          <span className="text-xs text-gray-400 ml-1">+{routes.length - 4}</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         </div>
       )}
