@@ -12,6 +12,9 @@ interface CityOverlayProps {
   onAssignCity?: (cityName: string, routeId: string) => void;
   showBoundaries?: boolean;
   colorMode?: 'performance' | 'routes';  // How to color cities
+  // New props for click-to-assign mode
+  cityAssignmentMode?: boolean;
+  selectedRouteForAssignment?: string | null;
 }
 
 interface CityPolygonData {
@@ -27,6 +30,8 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
   onAssignCity,
   showBoundaries = true,
   colorMode = 'performance',
+  cityAssignmentMode = false,
+  selectedRouteForAssignment = null,
 }) => {
   const [cityPolygons, setCityPolygons] = useState<CityPolygonData[]>([]);
   const [isLoadingBoundaries, setIsLoadingBoundaries] = useState(false);
@@ -78,91 +83,6 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
     const route = routes.find(r => r.id === selectedRouteId);
     return route?.cities.includes(cityName) || false;
   }, [selectedRouteId, routes]);
-
-  // Create info window content for a city
-  const createInfoWindowContent = useCallback((city: CityData): string => {
-    const changeColor = city.units_change >= 0 ? '#22c55e' : '#ef4444';
-    const changeIcon = city.units_change >= 0 ? '↑' : '↓';
-    const changePct = Math.abs(city.units_change_pct).toFixed(1);
-    const route = getCityRoute(city.city);
-
-    // Build route assignment buttons HTML
-    const routeButtonsHtml = routes.length > 0 && !route
-      ? `
-        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
-          <div style="font-size: 11px; color: #6b7280; margin-bottom: 8px; text-align: center;">Add to route:</div>
-          <div style="display: flex; justify-content: center; gap: 6px; flex-wrap: wrap;">
-            ${routes.slice(0, 6).map(r => `
-              <button
-                onclick="window.__assignCityToRoute && window.__assignCityToRoute('${city.city}', '${r.id}')"
-                style="display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: ${r.color}15; border: 1px solid ${r.color}40; border-radius: 12px; cursor: pointer; font-size: 11px; color: ${r.color}; font-weight: 500; transition: all 0.15s;"
-                onmouseover="this.style.background='${r.color}25'"
-                onmouseout="this.style.background='${r.color}15'"
-              >
-                <span style="width: 8px; height: 8px; border-radius: 50%; background: ${r.color};"></span>
-                ${r.name}
-              </button>
-            `).join('')}
-          </div>
-        </div>
-      `
-      : '';
-
-    return `
-      <div style="padding: 16px; min-width: 280px; max-width: 350px; font-family: system-ui, -apple-system, sans-serif;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-          <div style="width: 10px; height: 10px; border-radius: 50%; background-color: ${getCityColor(city)};"></div>
-          <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #1f2937;">
-            ${city.city}
-          </h3>
-          ${route ? `<span style="font-size: 11px; padding: 2px 8px; background-color: ${route.color}20; color: ${route.color}; border-radius: 12px; font-weight: 500;">${route.name}</span>` : ''}
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-          <div style="background: #f3f4f6; padding: 10px; border-radius: 8px;">
-            <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Accounts</div>
-            <div style="font-size: 20px; font-weight: 600; color: #1f2937;">${city.total_accounts}</div>
-          </div>
-          <div style="background: #f3f4f6; padding: 10px; border-radius: 8px;">
-            <div style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px;">Units CY</div>
-            <div style="font-size: 20px; font-weight: 600; color: #1f2937;">${city.total_units_cy.toLocaleString()}</div>
-          </div>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 8px; padding: 10px; background: ${changeColor}10; border-radius: 8px; margin-bottom: 12px;">
-          <span style="font-size: 16px;">${changeIcon}</span>
-          <span style="font-size: 14px; color: ${changeColor}; font-weight: 600;">
-            ${city.units_change >= 0 ? '+' : ''}${city.units_change.toLocaleString()} units (${changePct}%)
-          </span>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
-          <div style="text-align: center;">
-            <div style="font-size: 16px; font-weight: 600; color: #22c55e;">${city.growing_count}</div>
-            <div style="font-size: 10px; color: #6b7280;">Growing</div>
-          </div>
-          <div style="text-align: center;">
-            <div style="font-size: 16px; font-weight: 600; color: #ef4444;">${city.declining_count}</div>
-            <div style="font-size: 10px; color: #6b7280;">Declining</div>
-          </div>
-          <div style="text-align: center;">
-            <div style="font-size: 16px; font-weight: 600; color: #f59e0b;">${city.lost_count}</div>
-            <div style="font-size: 10px; color: #6b7280;">Lost</div>
-          </div>
-          <div style="text-align: center;">
-            <div style="font-size: 16px; font-weight: 600; color: #3b82f6;">${city.new_count}</div>
-            <div style="font-size: 10px; color: #6b7280;">New</div>
-          </div>
-        </div>
-
-        ${routeButtonsHtml}
-
-        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; text-align: center;">
-          Click for detailed city insights
-        </div>
-      </div>
-    `;
-  }, [getCityRoute, getCityColor, routes]);
 
   // Fetch city boundaries when cities change
   useEffect(() => {
@@ -245,23 +165,13 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
           zIndex: isHighlighted ? 10 : 1,
         });
 
-        // Add hover effects
+        // Add hover effects - lighter feedback, no info window
         polygon.addListener('mouseover', () => {
           polygon.setOptions({
             strokeWeight: isHighlighted ? 4 : 3,
-            fillOpacity: Math.min(opacity + 0.15, 0.85),
+            fillOpacity: Math.min(opacity + 0.1, 0.75),
           });
           onCityHover?.(city);
-
-          // Show info window on hover
-          if (infoWindowRef.current) {
-            infoWindowRef.current.setContent(createInfoWindowContent(city));
-            infoWindowRef.current.setPosition({
-              lat: boundary.center.lat,
-              lng: boundary.center.lng,
-            });
-            infoWindowRef.current.open(map);
-          }
         });
 
         polygon.addListener('mouseout', () => {
@@ -272,8 +182,18 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
           onCityHover?.(null);
         });
 
+        // Click handler - supports click-to-assign mode
         polygon.addListener('click', () => {
-          onCityClick?.(city);
+          // If in assignment mode and a route is selected, assign the city
+          if (cityAssignmentMode && selectedRouteForAssignment) {
+            addCityToRoute(selectedRouteForAssignment, city.city);
+            if (onAssignCity) {
+              onAssignCity(city.city, selectedRouteForAssignment);
+            }
+          } else {
+            // Normal click - show city details
+            onCityClick?.(city);
+          }
         });
 
         polygonsRef.current.push(polygon);
@@ -285,7 +205,7 @@ const CityOverlay: React.FC<CityOverlayProps> = ({
       polygonsRef.current.forEach(p => p.setMap(null));
       polygonsRef.current = [];
     };
-  }, [map, cityPolygons, maxUnits, onCityClick, onCityHover, createInfoWindowContent, getCityColor, isCityHighlighted, selectedRouteId]);
+  }, [map, cityPolygons, maxUnits, onCityClick, onCityHover, getCityColor, isCityHighlighted, selectedRouteId, cityAssignmentMode, selectedRouteForAssignment, addCityToRoute, onAssignCity]);
 
   // Don't render anything if not showing boundaries
   if (!showBoundaries) return null;
