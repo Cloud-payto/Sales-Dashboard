@@ -13,7 +13,7 @@ import {
 import { ChatMessage, ChatRequest, ChatResponse } from '../types/chat';
 
 const WIDGET_WIDTH = 380;
-const COLLAPSED_SIZE = 56;
+const WIDGET_HEIGHT = 480;
 
 const ChatWidget: React.FC = () => {
   // Chat state
@@ -24,23 +24,28 @@ const ChatWidget: React.FC = () => {
 
   // Widget state
   const [isExpanded, setIsExpanded] = useState(false);
-  const [position, setPosition] = useState(() => {
-    const saved = localStorage.getItem('chatWidgetPosition');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return { x: window.innerWidth - WIDGET_WIDTH - 24, y: window.innerHeight - 500 };
-      }
-    }
-    return { x: window.innerWidth - WIDGET_WIDTH - 24, y: window.innerHeight - 500 };
-  });
+  const [hasCustomPosition, setHasCustomPosition] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const widgetRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load saved position on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('chatWidgetPosition');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setPosition(parsed);
+        setHasCustomPosition(true);
+      } catch {
+        // Use default position
+      }
+    }
+  }, []);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -68,15 +73,20 @@ const ChatWidget: React.FC = () => {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
       });
+      // If using default position, convert to absolute position
+      if (!hasCustomPosition) {
+        setPosition({ x: rect.left, y: rect.top });
+        setHasCustomPosition(true);
+      }
     }
-  }, []);
+  }, [hasCustomPosition]);
 
   useEffect(() => {
     if (!isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const width = isExpanded ? WIDGET_WIDTH : COLLAPSED_SIZE;
-      const height = widgetRef.current?.offsetHeight || COLLAPSED_SIZE;
+      const width = isExpanded ? WIDGET_WIDTH : 56;
+      const height = isExpanded ? WIDGET_HEIGHT : 56;
 
       let newX = e.clientX - dragOffset.x;
       let newY = e.clientY - dragOffset.y;
@@ -168,13 +178,18 @@ const ChatWidget: React.FC = () => {
     }
   };
 
+  // Position styles - use bottom-right by default, or custom position if dragged
+  const positionStyle = hasCustomPosition
+    ? { left: position.x, top: position.y }
+    : { right: 24, bottom: 24 };
+
   // Collapsed state - floating button
   if (!isExpanded) {
     return (
       <div
         ref={widgetRef}
         className="fixed z-50"
-        style={{ left: position.x, top: position.y }}
+        style={positionStyle}
       >
         <button
           onClick={() => setIsExpanded(true)}
@@ -199,12 +214,17 @@ const ChatWidget: React.FC = () => {
     );
   }
 
+  // Expanded position - adjust for widget size when using default position
+  const expandedPositionStyle = hasCustomPosition
+    ? { left: position.x, top: position.y, width: WIDGET_WIDTH }
+    : { right: 24, bottom: 24, width: WIDGET_WIDTH };
+
   // Expanded state
   return (
     <div
       ref={widgetRef}
       className="fixed z-50"
-      style={{ left: position.x, top: position.y, width: WIDGET_WIDTH }}
+      style={expandedPositionStyle}
     >
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col h-[480px]">
         {/* Header - Drag Handle */}
