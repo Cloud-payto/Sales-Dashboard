@@ -252,6 +252,8 @@ export interface Route {
   description?: string;
   color: string;
   cities: string[];  // Array of city names
+  accounts: number[];  // Array of account numbers (for individual account assignments from dashboard data)
+  placeIds: string[];  // Array of place IDs (for individual place/marker assignments from map)
   createdAt: string;
   updatedAt: string;
 }

@@ -31,6 +31,16 @@ interface RouteContextType {
   removeCityFromRoute: (routeId: string, cityName: string) => void;
   getCityRoute: (cityName: string) => Route | null;
 
+  // Account assignment
+  addAccountToRoute: (routeId: string, accountNumber: number) => void;
+  removeAccountFromRoute: (routeId: string, accountNumber: number) => void;
+  getAccountRoute: (accountNumber: number) => Route | null;
+
+  // Place/marker assignment
+  addPlaceToRoute: (routeId: string, placeId: string) => void;
+  removePlaceFromRoute: (routeId: string, placeId: string) => void;
+  getPlaceRoute: (placeId: string) => Route | null;
+
   // Selection
   selectRoute: (routeId: string | null) => void;
   setManagingRoutes: (managing: boolean) => void;
@@ -101,6 +111,8 @@ export const RouteProvider: React.FC<RouteProviderProps> = ({ children }) => {
       description,
       color: getNextColor(),
       cities: [],
+      accounts: [],
+      placeIds: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -165,6 +177,88 @@ export const RouteProvider: React.FC<RouteProviderProps> = ({ children }) => {
   // Get which route a city belongs to
   const getCityRoute = useCallback((cityName: string): Route | null => {
     return routes.find(route => route.cities.includes(cityName)) || null;
+  }, [routes]);
+
+  // Add account to a route
+  const addAccountToRoute = useCallback((routeId: string, accountNumber: number) => {
+    setRoutes(prev => prev.map(route => {
+      // First, remove from any other route
+      if (route.id !== routeId && route.accounts?.includes(accountNumber)) {
+        return {
+          ...route,
+          accounts: route.accounts.filter(a => a !== accountNumber),
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      // Then add to target route
+      if (route.id === routeId && !route.accounts?.includes(accountNumber)) {
+        return {
+          ...route,
+          accounts: [...(route.accounts || []), accountNumber],
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return route;
+    }));
+  }, []);
+
+  // Remove account from a route
+  const removeAccountFromRoute = useCallback((routeId: string, accountNumber: number) => {
+    setRoutes(prev => prev.map(route =>
+      route.id === routeId
+        ? {
+            ...route,
+            accounts: (route.accounts || []).filter(a => a !== accountNumber),
+            updatedAt: new Date().toISOString(),
+          }
+        : route
+    ));
+  }, []);
+
+  // Get which route an account belongs to
+  const getAccountRoute = useCallback((accountNumber: number): Route | null => {
+    return routes.find(route => route.accounts?.includes(accountNumber)) || null;
+  }, [routes]);
+
+  // Add place to a route
+  const addPlaceToRoute = useCallback((routeId: string, placeId: string) => {
+    setRoutes(prev => prev.map(route => {
+      // First, remove from any other route
+      if (route.id !== routeId && route.placeIds?.includes(placeId)) {
+        return {
+          ...route,
+          placeIds: route.placeIds.filter(p => p !== placeId),
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      // Then add to target route
+      if (route.id === routeId && !route.placeIds?.includes(placeId)) {
+        return {
+          ...route,
+          placeIds: [...(route.placeIds || []), placeId],
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return route;
+    }));
+  }, []);
+
+  // Remove place from a route
+  const removePlaceFromRoute = useCallback((routeId: string, placeId: string) => {
+    setRoutes(prev => prev.map(route =>
+      route.id === routeId
+        ? {
+            ...route,
+            placeIds: (route.placeIds || []).filter(p => p !== placeId),
+            updatedAt: new Date().toISOString(),
+          }
+        : route
+    ));
+  }, []);
+
+  // Get which route a place belongs to
+  const getPlaceRoute = useCallback((placeId: string): Route | null => {
+    return routes.find(route => route.placeIds?.includes(placeId)) || null;
   }, [routes]);
 
   // Select a route
@@ -275,6 +369,12 @@ export const RouteProvider: React.FC<RouteProviderProps> = ({ children }) => {
     addCityToRoute,
     removeCityFromRoute,
     getCityRoute,
+    addAccountToRoute,
+    removeAccountFromRoute,
+    getAccountRoute,
+    addPlaceToRoute,
+    removePlaceFromRoute,
+    getPlaceRoute,
     selectRoute,
     setManagingRoutes,
     getRouteAnalytics,
@@ -291,6 +391,12 @@ export const RouteProvider: React.FC<RouteProviderProps> = ({ children }) => {
     addCityToRoute,
     removeCityFromRoute,
     getCityRoute,
+    addAccountToRoute,
+    removeAccountFromRoute,
+    getAccountRoute,
+    addPlaceToRoute,
+    removePlaceFromRoute,
+    getPlaceRoute,
     selectRoute,
     setManagingRoutes,
     getRouteAnalytics,

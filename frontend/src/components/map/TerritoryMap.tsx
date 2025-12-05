@@ -55,7 +55,7 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
   const [hoveredCity, setHoveredCity] = useState<CityData | null>(null);
 
 
-  const { getCityRoute } = useRoutes();
+  const { getCityRoute, getPlaceRoute, addPlaceToRoute } = useRoutes();
 
   // Get city insights data from dashboard
   const cityInsights = dashboardData?.city_insights;
@@ -124,6 +124,29 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
     }
   }, [visibleMarkers.length, isLoaded]);
 
+  // Get marker color based on color mode
+  const getMarkerColor = (markerData: PlaceMarker): string => {
+    if (colorMode === 'routes') {
+      // Check if this place is directly assigned to a route
+      const placeRoute = getPlaceRoute(markerData.id);
+      if (placeRoute) {
+        return placeRoute.color;
+      }
+      // Otherwise, check if it's in a city that's assigned to a route
+      // Extract city from address (assumes format: "..., City, State ZIP, ...")
+      const addressParts = markerData.place.address.split(',');
+      if (addressParts.length >= 2) {
+        const cityPart = addressParts[addressParts.length - 3]?.trim() || addressParts[1]?.trim();
+        const cityRoute = getCityRoute(cityPart);
+        if (cityRoute) {
+          return cityRoute.color;
+        }
+      }
+      return '#9ca3af'; // Gray for unassigned
+    }
+    return markerData.color; // Default status-based color
+  };
+
   // Update markers when visible markers change
   useEffect(() => {
     if (!mapInstanceRef.current || !isLoaded || isInitializing) return;
@@ -135,11 +158,13 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
     // Create new markers
     visibleMarkers.forEach((markerData) => {
       const isSelected = selectedMarkers.some((m) => m.id === markerData.id);
+      const markerColor = getMarkerColor(markerData);
+      const placeRoute = getPlaceRoute(markerData.id);
 
       // Create custom marker icon (using Symbol)
       const icon: google.maps.Symbol = {
         path: google.maps.SymbolPath.CIRCLE,
-        fillColor: markerData.color,
+        fillColor: markerColor,
         fillOpacity: isSelected ? 1 : 0.8,
         strokeColor: isSelected ? '#1e40af' : '#ffffff',
         strokeWeight: isSelected ? 3 : 2,
@@ -159,6 +184,12 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
 
       // Add click listener
       marker.addListener('click', () => {
+        // If in assignment mode and a route is selected, assign this place to the route
+        if (cityAssignmentMode && selectedRouteForAssignment) {
+          addPlaceToRoute(selectedRouteForAssignment, markerData.id);
+          return; // Don't show info window when assigning
+        }
+
         toggleMarkerSelection(markerData);
         if (onMarkerClick) {
           onMarkerClick(markerData);
@@ -168,6 +199,9 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
         if (infoWindowRef.current) {
           const place = markerData.place;
           const statusLabel = STATUS_LABELS[place.status] || place.status;
+          const routeInfo = placeRoute
+            ? `<div style="margin-bottom: 6px;"><strong>Route:</strong> <span style="color: ${placeRoute.color}; font-weight: 600;">${placeRoute.name}</span></div>`
+            : '';
 
           const content = `
             <div style="padding: 12px; min-width: 250px; max-width: 350px;">
@@ -175,6 +209,7 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
                 ${place.title}
               </h3>
               <div style="font-size: 13px; color: #6b7280; margin-bottom: 12px;">
+                ${routeInfo}
                 <div style="margin-bottom: 6px;">
                   <strong>Address:</strong><br/>
                   <span style="color: #374151;">${place.address}</span>
@@ -192,7 +227,7 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
                 ` : ''}
               </div>
               <div style="display: flex; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
-                <span style="display: inline-block; padding: 4px 12px; background-color: ${markerData.color}20; color: ${markerData.color}; border-radius: 16px; font-size: 12px; font-weight: 600;">
+                <span style="display: inline-block; padding: 4px 12px; background-color: ${markerColor}20; color: ${markerColor}; border-radius: 16px; font-size: 12px; font-weight: 600;">
                   ${statusLabel}
                 </span>
                 ${place.originalUrl ? `
@@ -214,9 +249,9 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
 
       markersRef.current.push(marker);
     });
-  }, [visibleMarkers, selectedMarkers, isLoaded, isInitializing, toggleMarkerSelection, onMarkerClick]);
+  }, [visibleMarkers, selectedMarkers, isLoaded, isInitializing, toggleMarkerSelection, onMarkerClick, colorMode, getPlaceRoute, getCityRoute, cityAssignmentMode, selectedRouteForAssignment, addPlaceToRoute]);
 
-  // Update marker styles when selection changes
+  // Update marker styles when selection changes or color mode changes
   useEffect(() => {
     if (!isLoaded || isInitializing) return;
 
@@ -224,9 +259,10 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
       const markerData = visibleMarkers[index];
       if (markerData) {
         const isSelected = selectedMarkers.some((m) => m.id === markerData.id);
+        const markerColor = getMarkerColor(markerData);
         const icon: google.maps.Symbol = {
           path: google.maps.SymbolPath.CIRCLE,
-          fillColor: markerData.color,
+          fillColor: markerColor,
           fillOpacity: isSelected ? 1 : 0.8,
           strokeColor: isSelected ? '#1e40af' : '#ffffff',
           strokeWeight: isSelected ? 3 : 2,
@@ -235,7 +271,7 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
         marker.setIcon(icon);
       }
     });
-  }, [selectedMarkers, visibleMarkers, isLoaded, isInitializing]);
+  }, [selectedMarkers, visibleMarkers, isLoaded, isInitializing, colorMode, getPlaceRoute, getCityRoute]);
 
   // Loading state for Google Maps
   if (!isLoaded && !loadError) {

@@ -76,6 +76,7 @@ const TerritoryMapSidebar: React.FC<TerritoryMapSidebarProps> = ({
     getUnassignedCities,
     addCityToRoute,
     removeCityFromRoute,
+    removePlaceFromRoute,
   } = useRoutes();
 
   const { dashboardData } = useDashboard();
@@ -475,7 +476,7 @@ const TerritoryMapSidebar: React.FC<TerritoryMapSidebarProps> = ({
                           )}
 
                           <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                            {route.cities.length}
+                            {route.cities.length + (route.placeIds?.length || 0)}
                           </span>
 
                           {isExpanded ? (
@@ -590,6 +591,39 @@ const TerritoryMapSidebar: React.FC<TerritoryMapSidebarProps> = ({
                                   </option>
                                 ))}
                               </select>
+                            )}
+
+                            {/* Individual Places/Accounts in Route */}
+                            {(route.placeIds?.length || 0) > 0 && (
+                              <div>
+                                <div className="text-xs font-medium text-gray-500 mb-2">
+                                  Individual Places ({route.placeIds?.length || 0})
+                                </div>
+                                <div className="space-y-1 max-h-32 overflow-y-auto">
+                                  {route.placeIds?.map((placeId) => {
+                                    const place = places.find(p => p.id === placeId);
+                                    return (
+                                      <div
+                                        key={placeId}
+                                        className="flex items-center justify-between p-2 bg-purple-50 rounded text-xs group"
+                                      >
+                                        <span className="flex-1 truncate text-gray-700">
+                                          {place?.title || placeId}
+                                        </span>
+                                        <button
+                                          onClick={() => removePlaceFromRoute(route.id, placeId)}
+                                          className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                <p className="text-xs text-gray-400 mt-1 italic">
+                                  These are individual locations assigned to this route
+                                </p>
+                              </div>
                             )}
 
                             {/* Route Actions */}
