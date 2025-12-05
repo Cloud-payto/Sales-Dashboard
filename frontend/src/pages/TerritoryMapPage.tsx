@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTerritory } from '../contexts/TerritoryContext';
 import TerritoryMap from '../components/map/TerritoryMap';
-import RoutePanel from '../components/map/RoutePanel';
+import TerritoryMapSidebar from '../components/map/TerritoryMapSidebar';
 import { PlaceMarker } from '../types/territory';
+import { CityData } from '../types';
 import { Loader2, AlertCircle, MapPin, Upload, RefreshCw } from 'lucide-react';
 
 const TerritoryMapPage: React.FC = () => {
@@ -12,18 +13,16 @@ const TerritoryMapPage: React.FC = () => {
     loadError,
     loadPlacesFromFile,
     reloadPlaces,
-    currentRoute,
   } = useTerritory();
 
-  const [showRoutePanel, setShowRoutePanel] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Show route panel when route is created
-  useEffect(() => {
-    if (currentRoute) {
-      setShowRoutePanel(true);
-    }
-  }, [currentRoute]);
+  // Map display state (lifted to page level for sidebar control)
+  const [showCityBoundaries, setShowCityBoundaries] = useState(true);
+  const [colorMode, setColorMode] = useState<'performance' | 'routes'>('performance');
+  const [cityAssignmentMode, setCityAssignmentMode] = useState(false);
+  const [selectedRouteForAssignment, setSelectedRouteForAssignment] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
 
   const handleMarkerClick = (marker: PlaceMarker) => {
     console.log('Marker clicked:', marker.place.title);
@@ -129,16 +128,33 @@ const TerritoryMapPage: React.FC = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-5rem)] bg-gray-100 relative">
-      {/* Map Container - Full screen map with unified control panel */}
-      <div className="absolute inset-0">
-        <TerritoryMap onMarkerClick={handleMarkerClick} className="w-full h-full" />
-      </div>
+    <div className="h-[calc(100vh-5rem)] bg-gray-100 flex">
+      {/* Sidebar */}
+      <TerritoryMapSidebar
+        showCityBoundaries={showCityBoundaries}
+        onToggleCityBoundaries={() => setShowCityBoundaries(!showCityBoundaries)}
+        colorMode={colorMode}
+        onColorModeChange={setColorMode}
+        onSelectCity={(city) => setSelectedCity(city)}
+        cityAssignmentMode={cityAssignmentMode}
+        onToggleCityAssignmentMode={() => setCityAssignmentMode(!cityAssignmentMode)}
+        selectedRouteForAssignment={selectedRouteForAssignment}
+        onSelectRouteForAssignment={setSelectedRouteForAssignment}
+      />
 
-      {/* Route Panel - Shows when a route is being planned */}
-      {showRoutePanel && currentRoute && (
-        <RoutePanel route={currentRoute} onClose={() => setShowRoutePanel(false)} />
-      )}
+      {/* Map Container */}
+      <div className="flex-1 relative">
+        <TerritoryMap
+          onMarkerClick={handleMarkerClick}
+          className="w-full h-full"
+          showCityBoundaries={showCityBoundaries}
+          colorMode={colorMode}
+          cityAssignmentMode={cityAssignmentMode}
+          selectedRouteForAssignment={selectedRouteForAssignment}
+          selectedCity={selectedCity}
+          onSelectCity={setSelectedCity}
+        />
+      </div>
 
       {/* Hidden file input for CSV upload */}
       <input

@@ -9,7 +9,6 @@ import { PlaceMarker } from '../../types/territory';
 import { CityData } from '../../types';
 import CityOverlay from './CityOverlay';
 import CityInsightsPanel from './CityInsightsPanel';
-import UnifiedControlPanel from './UnifiedControlPanel';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 // Status labels for display
@@ -23,9 +22,25 @@ const STATUS_LABELS: Record<string, string> = {
 interface TerritoryMapProps {
   onMarkerClick?: (marker: PlaceMarker) => void;
   className?: string;
+  // Props controlled by sidebar
+  showCityBoundaries: boolean;
+  colorMode: 'performance' | 'routes';
+  cityAssignmentMode: boolean;
+  selectedRouteForAssignment: string | null;
+  selectedCity: CityData | null;
+  onSelectCity: (city: CityData | null) => void;
 }
 
-const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = '' }) => {
+const TerritoryMap: React.FC<TerritoryMapProps> = ({
+  onMarkerClick,
+  className = '',
+  showCityBoundaries,
+  colorMode,
+  cityAssignmentMode,
+  selectedRouteForAssignment,
+  selectedCity,
+  onSelectCity,
+}) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
@@ -36,17 +51,8 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
   const { dashboardData } = useDashboard();
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // City insights state
-  const [showCityBoundaries, setShowCityBoundaries] = useState(true);
-  const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
+  // Hovered city state (local only - for tooltip)
   const [hoveredCity, setHoveredCity] = useState<CityData | null>(null);
-
-  // Display mode state
-  const [colorMode, setColorMode] = useState<'performance' | 'routes'>('performance');
-
-  // Click-to-assign mode state
-  const [cityAssignmentMode, setCityAssignmentMode] = useState(false);
-  const [selectedRouteForAssignment, setSelectedRouteForAssignment] = useState<string | null>(null);
 
 
   const { getCityRoute } = useRoutes();
@@ -270,7 +276,7 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
           cities={cityInsights.cities}
           showBoundaries={showCityBoundaries}
           colorMode={colorMode}
-          onCityClick={(city) => setSelectedCity(city)}
+          onCityClick={(city) => onSelectCity(city)}
           onCityHover={(city) => setHoveredCity(city)}
           cityAssignmentMode={cityAssignmentMode}
           selectedRouteForAssignment={selectedRouteForAssignment}
@@ -285,7 +291,7 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
       {selectedCity && (
         <CityInsightsPanel
           city={selectedCity}
-          onClose={() => setSelectedCity(null)}
+          onClose={() => onSelectCity(null)}
         />
       )}
 
@@ -299,21 +305,6 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({ onMarkerClick, className = 
             </p>
           </div>
         </div>
-      )}
-
-      {/* Unified Control Panel - Draggable, collapsible panel with all controls */}
-      {!isLoading && !isInitializing && (
-        <UnifiedControlPanel
-          showCityBoundaries={showCityBoundaries}
-          onToggleCityBoundaries={() => setShowCityBoundaries(!showCityBoundaries)}
-          colorMode={colorMode}
-          onColorModeChange={setColorMode}
-          onSelectCity={(city) => setSelectedCity(city)}
-          cityAssignmentMode={cityAssignmentMode}
-          onToggleCityAssignmentMode={() => setCityAssignmentMode(!cityAssignmentMode)}
-          selectedRouteForAssignment={selectedRouteForAssignment}
-          onSelectRouteForAssignment={setSelectedRouteForAssignment}
-        />
       )}
 
       {/* Minimal hover tooltip - just city name and route indicator */}
