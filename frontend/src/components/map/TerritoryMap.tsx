@@ -55,7 +55,7 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
   const [hoveredCity, setHoveredCity] = useState<CityData | null>(null);
 
 
-  const { getCityRoute, getPlaceRoute, addPlaceToRoute } = useRoutes();
+  const { routes, getCityRoute, getPlaceRoute, addPlaceToRoute } = useRoutes();
 
   // Get city insights data from dashboard
   const cityInsights = dashboardData?.city_insights;
@@ -136,10 +136,16 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
       // Extract city from address (assumes format: "..., City, State ZIP, ...")
       const addressParts = markerData.place.address.split(',');
       if (addressParts.length >= 2) {
+        // Try to get city - usually second to last before state/zip and country
         const cityPart = addressParts[addressParts.length - 3]?.trim() || addressParts[1]?.trim();
-        const cityRoute = getCityRoute(cityPart);
-        if (cityRoute) {
-          return cityRoute.color;
+        if (cityPart) {
+          // Check routes with case-insensitive comparison (cities in routes may be UPPERCASE)
+          const matchingRoute = routes.find(route =>
+            route.cities.some(city => city.toUpperCase() === cityPart.toUpperCase())
+          );
+          if (matchingRoute) {
+            return matchingRoute.color;
+          }
         }
       }
       return '#9ca3af'; // Gray for unassigned
@@ -249,7 +255,7 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
 
       markersRef.current.push(marker);
     });
-  }, [visibleMarkers, selectedMarkers, isLoaded, isInitializing, toggleMarkerSelection, onMarkerClick, colorMode, getPlaceRoute, getCityRoute, cityAssignmentMode, selectedRouteForAssignment, addPlaceToRoute]);
+  }, [visibleMarkers, selectedMarkers, isLoaded, isInitializing, toggleMarkerSelection, onMarkerClick, colorMode, routes, getPlaceRoute, getCityRoute, cityAssignmentMode, selectedRouteForAssignment, addPlaceToRoute]);
 
   // Update marker styles when selection changes or color mode changes
   useEffect(() => {
@@ -271,7 +277,7 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
         marker.setIcon(icon);
       }
     });
-  }, [selectedMarkers, visibleMarkers, isLoaded, isInitializing, colorMode, getPlaceRoute, getCityRoute]);
+  }, [selectedMarkers, visibleMarkers, isLoaded, isInitializing, colorMode, routes, getPlaceRoute, getCityRoute]);
 
   // Loading state for Google Maps
   if (!isLoaded && !loadError) {
