@@ -239,6 +239,40 @@ const TerritoryMapSidebar: React.FC<TerritoryMapSidebarProps> = ({
           )}
         </div>
 
+        {/* Color Mode - Always visible, prominent */}
+        <div className="p-4 border-b border-gray-100 bg-gray-50">
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
+            View By
+          </label>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onColorModeChange('performance')}
+              className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-medium transition-all ${
+                colorMode === 'performance'
+                  ? 'bg-green-600 text-white shadow-md'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
+              }`}
+            >
+              Performance
+            </button>
+            <button
+              onClick={() => onColorModeChange('routes')}
+              className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-medium transition-all ${
+                colorMode === 'routes'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
+              }`}
+            >
+              Routes
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            {colorMode === 'performance'
+              ? 'Cities colored by YoY growth (green = growing, red = declining)'
+              : 'Cities colored by their assigned route'}
+          </p>
+        </div>
+
         {/* Display Options Section */}
         <div className="border-b border-gray-100">
           <button
@@ -281,37 +315,6 @@ const TerritoryMapSidebar: React.FC<TerritoryMapSidebarProps> = ({
                   />
                 </button>
               </div>
-
-              {/* Color Mode */}
-              {showCityBoundaries && (
-                <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">
-                    Color Mode
-                  </label>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => onColorModeChange('performance')}
-                      className={`flex-1 py-2.5 px-3 rounded-lg text-xs font-medium transition-colors ${
-                        colorMode === 'performance'
-                          ? 'bg-green-100 text-green-700 border-2 border-green-500'
-                          : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
-                      }`}
-                    >
-                      Performance
-                    </button>
-                    <button
-                      onClick={() => onColorModeChange('routes')}
-                      className={`flex-1 py-2.5 px-3 rounded-lg text-xs font-medium transition-colors ${
-                        colorMode === 'routes'
-                          ? 'bg-purple-100 text-purple-700 border-2 border-purple-500'
-                          : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
-                      }`}
-                    >
-                      Routes
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
