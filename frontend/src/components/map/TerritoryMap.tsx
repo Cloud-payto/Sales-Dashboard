@@ -307,23 +307,32 @@ const TerritoryMap: React.FC<TerritoryMapProps> = ({
         </div>
       )}
 
-      {/* Minimal hover tooltip - just city name and route indicator */}
+      {/* Minimal hover tooltip - city name and route */}
       {hoveredCity && !selectedCity && (
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white rounded-lg px-3 py-2 z-20 pointer-events-none">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="font-medium">{hoveredCity.city}</span>
-            {(() => {
-              const currentRoute = getCityRoute(hoveredCity.city);
-              return currentRoute ? (
-                <span
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{ backgroundColor: currentRoute.color }}
-                />
-              ) : null;
-            })()}
-          </div>
+          {(() => {
+            const currentRoute = getCityRoute(hoveredCity.city);
+            return (
+              <>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-medium">{hoveredCity.city}</span>
+                  {currentRoute && (
+                    <span
+                      className="w-2.5 h-2.5 rounded-full"
+                      style={{ backgroundColor: currentRoute.color }}
+                    />
+                  )}
+                </div>
+                {currentRoute ? (
+                  <div className="text-xs text-gray-300 mt-0.5">{currentRoute.name}</div>
+                ) : (
+                  <div className="text-xs text-gray-400 mt-0.5">Unassigned</div>
+                )}
+              </>
+            );
+          })()}
           {cityAssignmentMode && selectedRouteForAssignment && (
-            <div className="text-xs text-gray-300 mt-1">Click to add to route</div>
+            <div className="text-xs text-blue-300 mt-1">Click to add to route</div>
           )}
         </div>
       )}
