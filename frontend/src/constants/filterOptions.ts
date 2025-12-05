@@ -43,6 +43,13 @@ export const DATA_VIEW_OPTIONS: DataViewOption[] = [
     icon: 'MapIcon',
     description: 'Geographic visualization',
   },
+  {
+    value: 'route_analytics',
+    label: 'Route Analytics',
+    icon: 'GitBranch',
+    description: 'Performance by route',
+    badge: 'New',
+  },
 ];
 
 // Account Sort Options

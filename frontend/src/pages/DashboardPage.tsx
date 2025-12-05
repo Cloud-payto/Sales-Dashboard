@@ -12,6 +12,7 @@ import AllAccountsView from '../components/AllAccountsView';
 import AccountsPerBrand from '../components/AccountsPerBrand';
 import SalesPerWorkingDay from '../components/SalesPerWorkingDay';
 import CityInsightsView from '../components/CityInsightsView';
+import RouteAnalyticsView from '../components/RouteAnalyticsView';
 
 const DashboardPage: React.FC = () => {
   const { dashboardData, isLoading } = useDashboard();
@@ -95,6 +96,9 @@ const DashboardPage: React.FC = () => {
   // Determine which view to show based on filters.dataView
   const renderMainContent = () => {
     switch (filters.dataView) {
+      case 'route_analytics':
+        return <RouteAnalyticsView />;
+
       case 'city_insights':
         return city_insights ? (
           <CityInsightsView data={city_insights} />
