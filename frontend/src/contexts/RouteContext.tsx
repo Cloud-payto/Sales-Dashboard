@@ -281,6 +281,77 @@ export const RouteProvider: React.FC<RouteProviderProps> = ({ children }) => {
       .filter(city => !assignedCities.has(city));
   }, [dashboardData, routes]);
 
+  // Helper to get all accounts from city insights with their data
+  const getAllAccountsFromCityInsights = useCallback(() => {
+    if (!dashboardData?.city_insights?.cities) return [];
+
+    const accountMap = new Map<number, {
+      account_number: number;
+      account_name: string;
+      city: string;
+      current_year_units: number;
+      previous_year_units: number;
+      change: number;
+      status: 'growing' | 'declining' | 'lost' | 'new';
+    }>();
+
+    dashboardData.city_insights.cities.forEach(city => {
+      // Add growing accounts
+      city.growing_accounts?.forEach(acc => {
+        accountMap.set(acc.account_number, {
+          account_number: acc.account_number,
+          account_name: acc.account_name,
+          city: city.city,
+          current_year_units: acc.current_year_units,
+          previous_year_units: acc.previous_year_units,
+          change: acc.change,
+          status: 'growing',
+        });
+      });
+
+      // Add declining accounts
+      city.declining_accounts?.forEach(acc => {
+        accountMap.set(acc.account_number, {
+          account_number: acc.account_number,
+          account_name: acc.account_name,
+          city: city.city,
+          current_year_units: acc.current_year_units,
+          previous_year_units: acc.previous_year_units,
+          change: acc.change,
+          status: 'declining',
+        });
+      });
+
+      // Add lost accounts
+      city.lost_accounts?.forEach(acc => {
+        accountMap.set(acc.account_number, {
+          account_number: acc.account_number,
+          account_name: acc.account_name,
+          city: city.city,
+          current_year_units: acc.current_year_units,
+          previous_year_units: acc.previous_year_units,
+          change: acc.change,
+          status: 'lost',
+        });
+      });
+
+      // Add new accounts
+      city.new_accounts?.forEach(acc => {
+        accountMap.set(acc.account_number, {
+          account_number: acc.account_number,
+          account_name: acc.account_name,
+          city: city.city,
+          current_year_units: acc.current_year_units,
+          previous_year_units: acc.previous_year_units,
+          change: acc.change,
+          status: 'new',
+        });
+      });
+    });
+
+    return Array.from(accountMap.values());
+  }, [dashboardData]);
+
   // Calculate analytics for a single route
   const getRouteAnalytics = useCallback((routeId: string): RouteAnalytics | null => {
     const route = routes.find(r => r.id === routeId);
@@ -291,7 +362,75 @@ export const RouteProvider: React.FC<RouteProviderProps> = ({ children }) => {
       city => route.cities.includes(city.city)
     );
 
-    if (routeCities.length === 0) {
+    // Get all account numbers that are already counted via city assignments
+    const cityAccountNumbers = new Set<number>();
+    routeCities.forEach(city => {
+      city.growing_accounts?.forEach(acc => cityAccountNumbers.add(acc.account_number));
+      city.declining_accounts?.forEach(acc => cityAccountNumbers.add(acc.account_number));
+      city.lost_accounts?.forEach(acc => cityAccountNumbers.add(acc.account_number));
+      city.new_accounts?.forEach(acc => cityAccountNumbers.add(acc.account_number));
+    });
+
+    // Get individually assigned accounts that are NOT already counted via cities
+    const allAccounts = getAllAccountsFromCityInsights();
+    const individualAccounts = (route.accounts || [])
+      .filter(accNum => !cityAccountNumbers.has(accNum))
+      .map(accNum => allAccounts.find(a => a.account_number === accNum))
+      .filter((acc): acc is NonNullable<typeof acc> => acc !== undefined);
+
+    // Calculate metrics from cities
+    let totalAccounts = routeCities.reduce((sum, c) => sum + c.total_accounts, 0);
+    let totalUnitsCY = routeCities.reduce((sum, c) => sum + c.total_units_cy, 0);
+    let totalUnitsPY = routeCities.reduce((sum, c) => sum + c.total_units_py, 0);
+    let growingCount = routeCities.reduce((sum, c) => sum + c.growing_count, 0);
+    let decliningCount = routeCities.reduce((sum, c) => sum + c.declining_count, 0);
+    let lostCount = routeCities.reduce((sum, c) => sum + c.lost_count, 0);
+    let newCount = routeCities.reduce((sum, c) => sum + c.new_count, 0);
+
+    // Add metrics from individually assigned accounts
+    totalAccounts += individualAccounts.length;
+    individualAccounts.forEach(acc => {
+      totalUnitsCY += acc.current_year_units;
+      totalUnitsPY += acc.previous_year_units;
+
+      switch (acc.status) {
+        case 'growing':
+          growingCount++;
+          break;
+        case 'declining':
+          decliningCount++;
+          break;
+        case 'lost':
+          lostCount++;
+          break;
+        case 'new':
+          newCount++;
+          break;
+      }
+    });
+
+    const unitsChange = totalUnitsCY - totalUnitsPY;
+    const unitsChangePct = totalUnitsPY > 0
+      ? ((totalUnitsCY / totalUnitsPY) - 1) * 100
+      : 0;
+
+    // Aggregate color groups from cities
+    const colorGroupMap = new Map<string, number>();
+    routeCities.forEach(city => {
+      city.color_groups_cy.forEach(cg => {
+        colorGroupMap.set(cg.color_group, (colorGroupMap.get(cg.color_group) || 0) + cg.units);
+      });
+    });
+
+    // Note: Individual accounts don't have color group info in city_insights,
+    // so we can't add their color groups here without additional data source
+
+    const colorGroupBreakdown: CityColorGroup[] = Array.from(colorGroupMap.entries())
+      .map(([color_group, units]) => ({ color_group, units }))
+      .sort((a, b) => b.units - a.units);
+
+    // Handle case where route has no cities but has individual accounts
+    if (routeCities.length === 0 && individualAccounts.length === 0) {
       return {
         routeId: route.id,
         routeName: route.name,
@@ -309,32 +448,6 @@ export const RouteProvider: React.FC<RouteProviderProps> = ({ children }) => {
       };
     }
 
-    // Aggregate metrics
-    const totalAccounts = routeCities.reduce((sum, c) => sum + c.total_accounts, 0);
-    const totalUnitsCY = routeCities.reduce((sum, c) => sum + c.total_units_cy, 0);
-    const totalUnitsPY = routeCities.reduce((sum, c) => sum + c.total_units_py, 0);
-    const unitsChange = totalUnitsCY - totalUnitsPY;
-    const unitsChangePct = totalUnitsPY > 0
-      ? ((totalUnitsCY / totalUnitsPY) - 1) * 100
-      : 0;
-
-    const growingCount = routeCities.reduce((sum, c) => sum + c.growing_count, 0);
-    const decliningCount = routeCities.reduce((sum, c) => sum + c.declining_count, 0);
-    const lostCount = routeCities.reduce((sum, c) => sum + c.lost_count, 0);
-    const newCount = routeCities.reduce((sum, c) => sum + c.new_count, 0);
-
-    // Aggregate color groups
-    const colorGroupMap = new Map<string, number>();
-    routeCities.forEach(city => {
-      city.color_groups_cy.forEach(cg => {
-        colorGroupMap.set(cg.color_group, (colorGroupMap.get(cg.color_group) || 0) + cg.units);
-      });
-    });
-
-    const colorGroupBreakdown: CityColorGroup[] = Array.from(colorGroupMap.entries())
-      .map(([color_group, units]) => ({ color_group, units }))
-      .sort((a, b) => b.units - a.units);
-
     return {
       routeId: route.id,
       routeName: route.name,
@@ -350,7 +463,7 @@ export const RouteProvider: React.FC<RouteProviderProps> = ({ children }) => {
       cities: routeCities,
       colorGroupBreakdown,
     };
-  }, [routes, dashboardData]);
+  }, [routes, dashboardData, getAllAccountsFromCityInsights]);
 
   // Get analytics for all routes
   const getAllRoutesAnalytics = useCallback((): RouteAnalytics[] => {

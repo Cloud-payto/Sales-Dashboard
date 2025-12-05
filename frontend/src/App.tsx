@@ -6,6 +6,7 @@ import { TerritoryProvider } from './contexts/TerritoryContext';
 import { RouteProvider } from './contexts/RouteContext';
 import Header from './components/Header';
 import FilterPanel from './components/FilterPanel';
+import ChatWidget from './components/ChatWidget';
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import TerritoryMapPage from './pages/TerritoryMapPage';
@@ -29,6 +30,7 @@ const AppContent: React.FC = () => {
               <Route path="/upload" element={<UploadPage />} />
               <Route path="/about" element={<AboutPage />} />
             </Routes>
+            <ChatWidget />
           </div>
           </Router>
         </RouteProvider>
